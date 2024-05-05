@@ -4,25 +4,25 @@ Install SWI Prolog
 https://www.swi-prolog.org/download/stable
 
 
-## List Url
+## List URL
 
 Landing Page
 
-'''sh
+```sh
 http://localhost:8000
-''''
+```
 
 Add Store
 
-'''sh
+```sh
 http://localhost:8000/add_store
-''''
+```
 
 Specific Store by Id
 
-'''sh
+```sh
 http://localhost:8000/store?id={id}
-''''
+```
 
 
 ## Database Location
