@@ -4,9 +4,6 @@
 :- use_module(library(http/html_write)).
 :- use_module(library(persistency)).
 
-
-:- dynamic store/1. % Declare store/1 predicate as dynamic
-
 % fact
 :- persistent(
     store(id:atom, name:atom, owner_name:atom, description:atom, address:atom, category:atom, created_at:atom, updated_at:atom)
