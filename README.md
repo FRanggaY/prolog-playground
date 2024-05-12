@@ -28,3 +28,13 @@ http://localhost:8000/store?id={id}
 ## Database Location
 
 look up on folder Documents/Prolog and you will find data_umkm.db
+
+## Check data using fetch public api
+
+Open SWI Prolog
+
+consult file fetch_public_api.pl
+
+```sh
+read_data.
+```
