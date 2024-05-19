@@ -38,3 +38,30 @@ consult file fetch_public_api.pl
 ```sh
 read_data.
 ```
+
+
+## Static api with express js
+
+```sh
+cd api
+```
+
+```sh
+npm install
+```
+
+```sh
+node server.js
+```
+
+## Running with web that implement api
+
+Open SWI Prolog
+
+consult file index_with_api.pl
+
+Landing Page
+
+```sh
+http://localhost:8000
+```
