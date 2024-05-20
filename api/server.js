@@ -1,20 +1,28 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = 3000;
+
+
+app.use(cors());
 
 app.use(express.json());
 
 // Static variable to store data
 let stores = [
-    { id: 1, name: 'Baso Enak' },
-    { id: 2, name: 'Mie Kikil' }
+    // { id: 1, name: 'Baso Enak' },
+    // { id: 2, name: 'Mie Kikil' }
 ];
 
 // Create: Add a new store
 app.post('/stores', (req, res) => {
     const newstore = {
         id: stores.length + 1,
-        name: req.body.name
+        name: req.body.name,
+        owner_name: req.body.owner_name,
+        description: req.body.description,
+        address: req.body.address,
+        category: req.body.category,
     };
     stores.push(newstore);
     res.status(201).json(newstore);
@@ -38,6 +46,10 @@ app.put('/stores/:id', (req, res) => {
     if (!store) return res.status(404).send('store not found');
 
     store.name = req.body.name;
+    store.owner_name = req.body.owner_name;
+    store.description = req.body.description;
+    store.address = req.body.address;
+    store.category = req.body.category;
     res.json(store);
 });
 
