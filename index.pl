@@ -40,6 +40,9 @@
 % Handler store detail specific name page
 :- http_handler(root(store_detail), store_detail_handler, []).
 
+% Handler saving store
+:- http_handler(root(submit_store_review), submit_store_review_handler, [method(post)]).
+
 % home or landing page
 home_handler(_Request) :-
     reply_html_page(
@@ -411,39 +414,6 @@ submit_edit_store_handler(Request) :-
         )
     ).
 
-% Generate store review list table
-store_review_list(StoreReviews) -->
-    html([
-        table(class('table'), [
-            \table_store_review_header,
-            tbody(\table_store_review_rows(StoreReviews))
-        ])
-    ]).
-
-% Table header for the store review list
-table_store_review_header -->
-    html(thead(tr([
-        th('ID'),
-        th('Name'),
-        th('Description'),
-        th('Rating')
-    ]))).
-
-% Generate table rows for each store review
-table_store_review_rows([]) --> [].
-table_store_review_rows([StoreReview|Rest]) -->
-    table_store_review_row(StoreReview),
-    table_store_review_rows(Rest).
-
-% Generate a table row for a single store review
-table_store_review_row(StoreReview) -->
-    html(tr([
-        td(StoreReview.id),
-        td(StoreReview.name),
-        td(StoreReview.description),
-        td(StoreReview.rating),
-    ])).
-
 % Handler for the /store_detail endpoint
 store_detail_handler(Request) :-
     % Extract the store ID from the request parameters
@@ -452,9 +422,9 @@ store_detail_handler(Request) :-
     atom_concat('http://localhost:3000/stores/', Id, Url),
     % Attempt to fetch data from the API
     (   catch(
-            (   http_open(Url, Stream, []),
-                json_read_dict(Stream, Data),
-                close(Stream)
+            (   http_open(Url, StreamStore, []),
+                json_read_dict(StreamStore, Data),
+                close(StreamStore)
             ),
             Error,
             (   format(user_output, 'Failed to fetch data: ~w', [Error]),
@@ -463,7 +433,13 @@ store_detail_handler(Request) :-
         )
     ->  % If successful, generate the detail form with pre-filled data and this should be dynamic id
         
-        % put this fetch store revies by store id
+        % Fetch data from API using http_open/3
+        atom_concat('http://localhost:3000/store-reviews/', Id, UrlReview),
+        setup_call_cleanup(
+            http_open(UrlReview, StreamReview, []),
+            json_read_dict(StreamReview, StoreReviews),
+            close(StreamReview)
+        ),
 
         reply_html_page(
             title('UMKM | Detail Toko'),
@@ -509,6 +485,9 @@ store_detail_handler(Request) :-
                         div(class='mt-5', [ h5('Tambah Ulasan') ]),
                         form([action='/submit_store_review', method='POST'], [
                             div(class='mb-3', [
+                                input([class='form-control', id='inputStoreId', type='text', name='store_id', value=Id, hidden=true ])
+                            ]),
+                            div(class='mb-3', [
                                 label([class='form-label', for='inputName'], 'Nama'),
                                 input([class='form-control', id='inputName', type='text', name='name' ])
                             ]),
@@ -548,6 +527,75 @@ store_detail_handler(Request) :-
                 ])
             ])
         )
+    ).
+
+% Generate store review list table
+store_review_list(StoreReviews) -->
+    html([
+        table(class('table'), [
+            \table_store_review_header,
+            tbody(\table_store_review_rows(StoreReviews))
+        ])
+    ]).
+
+% Table header for the store review list
+table_store_review_header -->
+    html(thead(tr([
+        th('ID'),
+        th('Name'),
+        th('Description'),
+        th('Rating')
+    ]))).
+
+% Generate table rows for each store review
+table_store_review_rows([]) --> [].
+table_store_review_rows([StoreReview|Rest]) -->
+    table_store_review_row(StoreReview),
+    table_store_review_rows(Rest).
+
+% Generate a table row for a single store review
+table_store_review_row(StoreReview) -->
+    html(tr([
+        td(StoreReview.id),
+        td(StoreReview.name),
+        td(StoreReview.description),
+        td(StoreReview.rating)
+    ])).
+
+submit_store_review_handler(Request) :-
+    http_parameters(Request, [name(Name, []), description(Description, []), rating(Rating, []), store_id(StoreId, [])]), % Extract form parameters
+    
+    % Now, you can send the data to the API endpoint (localhost:8000/stores) using HTTP client predicates like http_post/4
+    json_data(JSON, [name=Name, rating=Rating, description=Description, store_id=StoreId]),
+    % Send POST request to the API endpoint
+    catch(
+        http_post('http://localhost:3000/store-reviews', json(JSON), Response, []),
+        Error,
+        handle_error(Error)
+    ),
+
+    % If there was no error, print success message
+    (   var(Error) % Check if there was no error
+    ->  reply_html_page(
+        title('UMKM | Tambah Ulasan Toko'),
+        \html_bootstrap_head, % add boostrap link
+        div([  
+            div(class='p-4 bg-primary text-white', [
+                div([
+                    h5('Website UMKM')
+                ])
+            ]),
+            div(class='card mx-5 mt-4', [
+                div(class='card-body', [
+                    h5(class='card-title mt-2', ['Ulasan Toko dengan nama ', Name, ' berhasil ditambahkan.']),
+                    div(class='d-flex gap-2 flex-wrap',[
+                        a([class='btn btn-primary', href='/store'], 'Kembali')
+                    ])
+                ])
+            ])
+        ])
+    )
+    ;   true % Do nothing if there was an error, as its already handled
     ).
 
 % Handle HTTP request errors
