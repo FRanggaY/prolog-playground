@@ -163,11 +163,7 @@ add_store_handler(_Request) :-
             ]),
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
-                    form([action='/submit_store', method='POST'], [
-                        div(class='mb-3', [
-                            label([class='form-label', for='inputId'], 'Id'),
-                            input([class='form-control', id='inputId', type='text', name='id'])
-                        ]),
+                    form([action='/submit_store', method='POST'], [                        
                         div(class='mb-3', [
                             label([class='form-label', for='inputName'], 'Nama'),
                             input([class='form-control', id='inputName', type='text', name='name'])
@@ -291,10 +287,10 @@ json_data(JSON, Data) :-
     dict_create(JSON, json, Data).
 
 submit_store_handler(Request) :-
-    http_parameters(Request, [id(Id, []), name(Name, []), owner_name(OwnerName, []), description(Description, []), address(Address, []), category(Category, [])]), % Extract form parameters
+    http_parameters(Request, [name(Name, []), owner_name(OwnerName, []), description(Description, []), address(Address, []), category(Category, [])]), % Extract form parameters
     
     % Now, you can send the data to the API endpoint (localhost:8000/stores) using HTTP client predicates like http_post/4
-    json_data(JSON, [id=Id, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]),
+    json_data(JSON, [name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]),
     % Send POST request to the API endpoint
     catch(
         http_post('http://localhost:3000/stores', json(JSON), Response, []),
