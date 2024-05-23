@@ -4,7 +4,11 @@ Install SWI Prolog
 https://www.swi-prolog.org/download/stable
 
 
-## List URL
+## Web Prolog
+
+Open SWI Prolog
+
+consult file index.pl
 
 Landing Page
 
@@ -24,44 +28,28 @@ Specific Store by Id
 http://localhost:8000/store?id={id}
 ```
 
-
-## Database Location
-
-look up on folder Documents/Prolog and you will find data_umkm.db
-
-## Check data using fetch public api
-
-Open SWI Prolog
-
-consult file fetch_public_api.pl
-
-```sh
-read_data.
-```
-
-
 ## Static api with express js
+
+change directory to api
 
 ```sh
 cd api
 ```
 
+Install package
+
 ```sh
 npm install
 ```
+
+Serve
 
 ```sh
 node server.js
 ```
 
-## Running with web that implement api
-
-Open SWI Prolog
-
-consult file index_with_api.pl
-
-Landing Page
+Hard Reload Serve
 
 ```sh
-http://localhost:8000
+node --watch server.js
 ```
