@@ -12,8 +12,12 @@
 
 % Declare dynamic predicates
 :- dynamic store_list/1.
-:- dynamic table_rows/1.
-:- dynamic table_row/1.
+:- dynamic table_store_rows/1.
+:- dynamic table_store_row/1.
+
+:- dynamic store_review_list/1.
+:- dynamic table_store_review_rows/1.
+:- dynamic table_store_review_row/1.
 
 % handler home or landing page
 :- http_handler(root(.), home_handler, []).
@@ -24,8 +28,17 @@
 % Handler store add page
 :- http_handler(root(add_store), add_store_handler, []).
 
-% Handler store specific name page
+% Handler saving store
+:- http_handler(root(submit_store), submit_store_handler, [method(post)]).
+
+% Handler store edit specific name page
 :- http_handler(root(store_edit), store_edit_handler, []).
+
+% Handler submit edit store
+:- http_handler(root(submit_edit_store), submit_edit_store_handler, [method(post)]).
+
+% Handler store detail specific name page
+:- http_handler(root(store_detail), store_detail_handler, []).
 
 % home or landing page
 home_handler(_Request) :-
@@ -58,14 +71,6 @@ home_handler(_Request) :-
                         div(class='mb-3', [
                             label([class='form-label', for='inputKategori'], 'Kategori'),
                             input([class='form-control', id='inputKategori', type='text', name='kategori'])
-                        ]),
-                        div(class='mb-3', [
-                            label([class='form-label', for='inputPenilaian'], 'Penilaian'),
-                            select([class="form-select", name='penilaian'], [
-                                option(value='produk', 'Produk'),
-                                option(value='fasilitas', 'Fasilitas'),
-                                option(value='layanan', 'Layanan')
-                            ])
                         ]),
                         button([type="submit", class="btn btn-primary"], 'Cari')
                     ])
@@ -112,13 +117,13 @@ store_handler(Request) :-
 store_list(Stores) -->
     html([
         table(class('table'), [
-            \table_header,
-            tbody(\table_rows(Stores))
+            \table_store_header,
+            tbody(\table_store_rows(Stores))
         ])
     ]).
 
 % Table header for the store list
-table_header -->
+table_store_header -->
     html(thead(tr([
         th('ID'),
         th('Name'),
@@ -126,17 +131,18 @@ table_header -->
     ]))).
 
 % Generate table rows for each store
-table_rows([]) --> [].
-table_rows([Store|Rest]) -->
-    table_row(Store),
-    table_rows(Rest).
+table_store_rows([]) --> [].
+table_store_rows([Store|Rest]) -->
+    table_store_row(Store),
+    table_store_rows(Rest).
 
 % Generate a table row for a single store
-table_row(Store) -->
+table_store_row(Store) -->
     html(tr([
         td(Store.id),
         td(Store.name),
-        td(div([
+        td(div(class='d-flex gap-2',[
+            a([class('btn btn-primary'), href('/store_detail?id=' + Store.id)], 'Detail'),
             a([class('btn btn-warning'), href('/store_edit?id=' + Store.id)], 'Edit'),
             button([type(button), class('btn btn-danger'), onclick('deleteStore(' + Store.id + ')')], 'Delete')
         ]))
@@ -279,8 +285,8 @@ store_edit_handler(Request) :-
     ).
 
 
-% Handler saving store
-:- http_handler(root(submit_store), submit_store_handler, [method(post)]).
+
+
 
 % Define json_data/2 predicate to construct a JSON object
 json_data(JSON, Data) :-
@@ -321,9 +327,6 @@ submit_store_handler(Request) :-
     )
     ;   true % Do nothing if there was an error, as its already handled
     ).
-
-% Handler edit store
-:- http_handler(root(submit_edit_store), submit_edit_store_handler, [method(post)]).
 
 json_edit_data(json(Data), json(Data)).
 
@@ -407,6 +410,146 @@ submit_edit_store_handler(Request) :-
             ])
         )
     ).
+
+% Generate store review list table
+store_review_list(StoreReviews) -->
+    html([
+        table(class('table'), [
+            \table_store_review_header,
+            tbody(\table_store_review_rows(StoreReviews))
+        ])
+    ]).
+
+% Table header for the store review list
+table_store_review_header -->
+    html(thead(tr([
+        th('ID'),
+        th('Name'),
+        th('Description'),
+        th('Rating')
+    ]))).
+
+% Generate table rows for each store review
+table_store_review_rows([]) --> [].
+table_store_review_rows([StoreReview|Rest]) -->
+    table_store_review_row(StoreReview),
+    table_store_review_rows(Rest).
+
+% Generate a table row for a single store review
+table_store_review_row(StoreReview) -->
+    html(tr([
+        td(StoreReview.id),
+        td(StoreReview.name),
+        td(StoreReview.description),
+        td(StoreReview.rating),
+    ])).
+
+% Handler for the /store_detail endpoint
+store_detail_handler(Request) :-
+    % Extract the store ID from the request parameters
+    http_parameters(Request, [id(Id, [])]),
+    % Construct the URL for the API request
+    atom_concat('http://localhost:3000/stores/', Id, Url),
+    % Attempt to fetch data from the API
+    (   catch(
+            (   http_open(Url, Stream, []),
+                json_read_dict(Stream, Data),
+                close(Stream)
+            ),
+            Error,
+            (   format(user_output, 'Failed to fetch data: ~w', [Error]),
+                fail
+            )
+        )
+    ->  % If successful, generate the detail form with pre-filled data and this should be dynamic id
+        
+        % put this fetch store revies by store id
+
+        reply_html_page(
+            title('UMKM | Detail Toko'),
+            \html_bootstrap_head, % Add Bootstrap link
+            div([
+                div(class='p-4 bg-primary text-white', [
+                    div([ h5('Website UMKM') ])
+                ]),
+                div(class='card mx-5 mt-4', [
+                    div(class='card-body', [
+                        h5(class='card-title mt-2', 'Detail Toko UMKM'),
+                        div(class='d-flex gap-2 flex-wrap', [
+                            a([class='btn btn-primary', href='/store'], 'Kembali')
+                        ])
+                    ])
+                ]),
+                div(class='card mx-5 mt-4', [
+                    div(class='card-body', [
+                        div(class='mb-3', [
+                            table(class('table'), [
+                                tr([
+                                    td('Nama Toko'),
+                                    td(Data.get(name))
+                                ]),
+                                tr([
+                                    td('Nama Pemilik'),
+                                    td(Data.get(owner_name))
+                                ]),
+                                tr([
+                                    td('Deskripsi'),
+                                    td(Data.get(description))
+                                ]),
+                                tr([
+                                    td('Alamat'),
+                                    td(Data.get(address))
+                                ]),
+                                tr([
+                                    td('Kategori'),
+                                    td(Data.get(category))
+                                ])
+                            ])
+                        ]),
+                        div(class='mt-5', [ h5('Tambah Ulasan') ]),
+                        form([action='/submit_store_review', method='POST'], [
+                            div(class='mb-3', [
+                                label([class='form-label', for='inputName'], 'Nama'),
+                                input([class='form-control', id='inputName', type='text', name='name' ])
+                            ]),
+                            div(class='mb-3', [
+                                label([class='form-label', for='inputDescription'], 'Deskripsi'),
+                                input([class='form-control', id='inputDescription', type='text', name='description' ])
+                            ]),
+                            div(class='mb-3', [
+                                label([class='form-label', for='inputRating'], 'Rating'),
+                                input([class='form-control', id='inputRating', type='number', name='rating' ])
+                            ]),
+                            button([type="submit", class="btn btn-primary"], 'Tambah')
+                        ]),
+                        div(class='mt-5', [ h5('Ulasan') ]),
+                        div(class('card mx-5 mt-4'), [
+                            \store_review_list(StoreReviews)
+                        ])
+                    ])
+                ])
+            ])
+        )
+    ;   % If data fetch failed, display an error message
+        reply_html_page(
+            title('UMKM | Detail Toko'),
+            \html_bootstrap_head, % Add Bootstrap link
+            div([
+                div(class='p-4 bg-primary text-white', [
+                    div([ h5('Website UMKM') ])
+                ]),
+                div(class='card mx-5 mt-4', [
+                    div(class='card-body', [
+                        h5(class='card-title mt-2', 'Toko UMKM tidak ditemukan'),
+                        div(class='d-flex gap-2 flex-wrap', [
+                            a([class='btn btn-primary', href='/store'], 'Kembali')
+                        ])
+                    ])
+                ])
+            ])
+        )
+    ).
+
 % Handle HTTP request errors
 handle_error(Error) :-
     format('Failed to submit store data: ~w~n', [Error]).
