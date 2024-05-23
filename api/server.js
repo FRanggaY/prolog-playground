@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const morgan = require('morgan');
 const app = express();
 const port = 3000;
 
@@ -7,6 +8,8 @@ const port = 3000;
 app.use(cors());
 
 app.use(express.json());
+
+app.use(morgan('dev'));
 
 // Static variable to store data
 let stores = [
@@ -24,6 +27,7 @@ app.post('/stores', (req, res) => {
         address: req.body.address,
         category: req.body.category,
     };
+
     stores.push(newstore);
     res.status(201).json(newstore);
 });
