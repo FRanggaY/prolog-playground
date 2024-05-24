@@ -66,7 +66,7 @@ home_handler(_Request) :-
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
                     h5(class='card-title mt-2', 'Pencarian rekomendasi'),
-                    form([method='GET'], [
+                    form([method='GET', autocomplete='off'], [
                         div(class='mb-3', [
                             label([class='form-label', for='inputLokasi'], 'Lokasi'),
                             input([class='form-control', id='inputLokasi', type='text', name='lokasi'])
@@ -172,7 +172,7 @@ add_store_handler(_Request) :-
             ]),
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
-                    form([action='/submit_store', method='POST'], [                        
+                    form([action='/submit_store', method='POST', autocomplete='off'], [                        
                         div(class='mb-3', [
                             label([class='form-label', for='inputName'], 'Nama'),
                             input([class='form-control', id='inputName', type='text', name='name'])
@@ -236,7 +236,7 @@ store_edit_handler(Request) :-
                 ]),
                 div(class='card mx-5 mt-4', [
                     div(class='card-body', [
-                        form([action='/submit_edit_store', method='POST'], [
+                        form([action='/submit_edit_store', method='POST', autocomplete='off'], [
                             div(class='mb-3', [
                                 label([class='form-label', for='inputId'], 'Id'),
                                 input([class='form-control', id='inputId', type='text', name='id', value=Data.get(id), readonly])
@@ -483,7 +483,7 @@ store_detail_handler(Request) :-
                             ])
                         ]),
                         div(class='mt-5', [ h5('Tambah Ulasan') ]),
-                        form([action='/submit_store_review', method='POST'], [
+                        form([action='/submit_store_review', method='POST', autocomplete='off'], [
                             div(class='mb-3', [
                                 input([class='form-control', id='inputStoreId', type='text', name='store_id', value=Id, hidden=true ])
                             ]),
