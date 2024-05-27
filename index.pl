@@ -142,12 +142,12 @@ table_store_rows([Store|Rest]) -->
 % Generate a table row for a single store
 table_store_row(Store) -->
     html(tr([
-        td(Store.id),
+        td(Store.code),
         td(Store.name),
         td(div(class='d-flex gap-2',[
-            a([class('btn btn-primary'), href('/store_detail?id=' + Store.id)], 'Detail'),
-            a([class('btn btn-warning'), href('/store_edit?id=' + Store.id)], 'Edit'),
-            button([type(button), class('btn btn-danger'), onclick('deleteStore(' + Store.id + ')')], 'Delete')
+            a([class('btn btn-primary'), href('/store_detail?code=' + Store.code)], 'Detail'),
+            a([class('btn btn-warning'), href('/store_edit?code=' + Store.code)], 'Edit'),
+            button([type(button), class('btn btn-danger'), onclick('deleteStore(' + Store.code + ')')], 'Delete')
         ]))
     ])).
 
@@ -204,9 +204,9 @@ add_store_handler(_Request) :-
 % Handler for the /store_edit endpoint
 store_edit_handler(Request) :-
     % Extract the store ID from the request parameters
-    http_parameters(Request, [id(Id, [])]),
+    http_parameters(Request, [code(Code, [])]),
     % Construct the URL for the API request
-    atom_concat('http://localhost:3000/stores/', Id, Url),
+    atom_concat('http://localhost:3000/stores/', Code, Url),
     % Attempt to fetch data from the API
     (   catch(
             (   http_open(Url, Stream, []),
@@ -238,8 +238,8 @@ store_edit_handler(Request) :-
                     div(class='card-body', [
                         form([action='/submit_edit_store', method='POST', autocomplete='off'], [
                             div(class='mb-3', [
-                                label([class='form-label', for='inputId'], 'Id'),
-                                input([class='form-control', id='inputId', type='text', name='id', value=Data.get(id), readonly])
+                                label([class='form-label', for='inputCode'], 'Code'),
+                                input([class='form-control', id='inputCode', type='text', name='code', value=Data.get(code), readonly])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputName'], 'Nama'),
@@ -337,7 +337,7 @@ json_edit_data(json(Data), json(Data)).
 submit_edit_store_handler(Request) :-
     % Extract form parameters
     (   http_parameters(Request, [
-            id(Id, []),
+            code(Code, []),
             name(Name, []),
             owner_name(OwnerName, []),
             description(Description, []),
@@ -345,8 +345,8 @@ submit_edit_store_handler(Request) :-
             category(Category, [])
         ])
     ->  % Ensure all parameters are properly instantiated
-        json_edit_data(json([id=Id, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]), JSON),
-        format(atom(Url), 'http://localhost:3000/stores/~w', [Id]),
+        json_edit_data(json([code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]), JSON),
+        format(atom(Url), 'http://localhost:3000/stores/~w', [Code]),
         % Attempt to send the PUT request to the API endpoint
         (   catch(
                 http_put(Url, json(JSON), Response, []),
@@ -417,9 +417,9 @@ submit_edit_store_handler(Request) :-
 % Handler for the /store_detail endpoint
 store_detail_handler(Request) :-
     % Extract the store ID from the request parameters
-    http_parameters(Request, [id(Id, [])]),
+    http_parameters(Request, [store_code(StoreCode, [])]),
     % Construct the URL for the API request
-    atom_concat('http://localhost:3000/stores/', Id, Url),
+    atom_concat('http://localhost:3000/stores/', StoreCode, Url),
     % Attempt to fetch data from the API
     (   catch(
             (   http_open(Url, StreamStore, []),
@@ -431,10 +431,10 @@ store_detail_handler(Request) :-
                 fail
             )
         )
-    ->  % If successful, generate the detail form with pre-filled data and this should be dynamic id
+    ->  % If successful, generate the detail form with pre-filled data and this should be dynamic code
         
         % Fetch data from API using http_open/3
-        atom_concat('http://localhost:3000/store-reviews/', Id, UrlReview),
+        atom_concat('http://localhost:3000/store-reviews/', StoreCode, UrlReview),
         setup_call_cleanup(
             http_open(UrlReview, StreamReview, []),
             json_read_dict(StreamReview, StoreReviews),
@@ -485,7 +485,7 @@ store_detail_handler(Request) :-
                         div(class='mt-5', [ h5('Tambah Ulasan') ]),
                         form([action='/submit_store_review', method='POST', autocomplete='off'], [
                             div(class='mb-3', [
-                                input([class='form-control', id='inputStoreId', type='text', name='store_id', value=Id, hidden=true ])
+                                input([class='form-control', id='inputStoreCode', type='text', name='store_code', value=StoreCode, hidden=true ])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputName'], 'Nama'),
@@ -556,17 +556,17 @@ table_store_review_rows([StoreReview|Rest]) -->
 % Generate a table row for a single store review
 table_store_review_row(StoreReview) -->
     html(tr([
-        td(StoreReview.id),
+        td(StoreReview.store_code),
         td(StoreReview.name),
         td(StoreReview.description),
         td(StoreReview.rating)
     ])).
 
 submit_store_review_handler(Request) :-
-    http_parameters(Request, [name(Name, []), description(Description, []), rating(Rating, []), store_id(StoreId, [])]), % Extract form parameters
+    http_parameters(Request, [name(Name, []), description(Description, []), rating(Rating, []), store_code(StoreCode, [])]), % Extract form parameters
     
     % Now, you can send the data to the API endpoint (localhost:8000/stores) using HTTP client predicates like http_post/4
-    json_data(JSON, [name=Name, rating=Rating, description=Description, store_id=StoreId]),
+    json_data(JSON, [name=Name, rating=Rating, description=Description, store_code=StoreCode]),
     % Send POST request to the API endpoint
     catch(
         http_post('http://localhost:3000/store-reviews', json(JSON), Response, []),
@@ -621,10 +621,10 @@ html_bootstrap_head -->
     html(head([
         link([rel('stylesheet'), href('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')]),
         script(type('text/javascript'), "
-            async function deleteStore(id) {
+            async function deleteStore(code) {
             if (confirm('Are you sure you want to delete this store?')) {
                 try {
-                    const response = await fetch('http://localhost:3000/stores/' + id, {
+                    const response = await fetch('http://localhost:3000/stores/' + code, {
                         method: 'DELETE'
                     });
 
