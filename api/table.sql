@@ -14,7 +14,7 @@ CREATE TABLE store_review (
     store_code varchar(5) NOT NULL,
     name varchar(156) NOT NULL,
     description varchar(512),
-    rating INT NOT NULL CHECK (rating BETWEEN 0 AND 10),
+    rating INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (store_code) REFERENCES store(code)
