@@ -105,9 +105,19 @@ exports.getStoreReviews = async (req, res) => {
 
 exports.getStoreRecommendation = async (req, res) => {
 	const { address, category } = req.query;
-	const sql = `SELECT * FROM store 
+	const sql = `SELECT 
+			ROUND(AVG(sr.rating), 1) AS average_rating,
+			s.*
+		FROM 
+			store s
+		INNER JOIN 
+			store_review sr ON sr.store_code = s.code
 		WHERE UPPER(address) LIKE ?
 		AND UPPER(category) LIKE ?
+		GROUP BY 
+			s.code
+		ORDER BY 
+			average_rating DESC
 		LIMIT 5`;
 	try {
 		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`, `%${category.toUpperCase()}%`]);
