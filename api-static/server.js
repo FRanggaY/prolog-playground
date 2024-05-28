@@ -13,7 +13,7 @@ app.use(morgan("dev"));
 // Static variable to store data
 let stores = [
 	{
-		id: 1,
+		code: '1',
 		name: "Baso Enak",
 		owner_name: "yulia",
 		description: "Enak ini",
@@ -23,8 +23,8 @@ let stores = [
 ];
 
 let storeReviews = [
-	{ id: 1, store_id: 1, name: "andi", description: "gk enak", rating: 1 },
-	{ id: 2, store_id: 1, name: "budi", description: "gk enak", rating: 1 },
+	{ code: '1', store_code: '1', name: "andi", description: "gk enak", rating: 1 },
+	{ code: '2', store_code: '1', name: "budi", description: "gk enak", rating: 1 },
 ];
 
 app.get("/store-recommendation", (req, res) => {
@@ -35,7 +35,7 @@ app.get("/store-recommendation", (req, res) => {
 // Create: Add a new store
 app.post("/stores", (req, res) => {
 	const newstore = {
-		id: stores.length + 1,
+		code: req.body.code,
 		name: req.body.name,
 		owner_name: req.body.owner_name,
 		description: req.body.description,
@@ -52,9 +52,9 @@ app.get("/stores", (req, res) => {
 	res.json(stores);
 });
 
-// Read: Get a single store by id
-app.get("/stores/:id", (req, res) => {
-	const store = stores.find((u) => u.id === parseInt(req.params.id));
+// Read: Get a single store by code
+app.get("/stores/:code", (req, res) => {
+	const store = stores.find((u) => u.code === String(req.params.code));
 	if (!store) return res.status(404).send("store not found");
 	res.json(store);
 });
@@ -62,8 +62,8 @@ app.get("/stores/:id", (req, res) => {
 // Create: Add a new store reviews
 app.post("/store-reviews", (req, res) => {
 	const newstoreReview = {
-		id: storeReviews.length + 1,
-		store_id: parseInt(req.body.store_id),
+		code: storeReviews.length + 1,
+		store_code: String(req.body.store_code),
 		name: req.body.name,
 		description: req.body.description,
 		rating: req.body.rating,
@@ -72,16 +72,16 @@ app.post("/store-reviews", (req, res) => {
 	res.status(201).json(newstoreReview);
 });
 
-// Read: Get a store reviews by store id
-app.get("/store-reviews/:id", (req, res) => {
-	const store = storeReviews.filter((u) => u.store_id === parseInt(req.params.id));
+// Read: Get a store reviews by store code
+app.get("/store-reviews/:code", (req, res) => {
+	const store = storeReviews.filter((u) => u.store_code == String(req.params.code));
 	if (!store) return res.status(404).send("store not found");
 	res.json(store);
 });
 
-// Update: Update a store by id
-app.put("/stores/:id", (req, res) => {
-	const store = stores.find((u) => u.id === parseInt(req.params.id));
+// Update: Update a store by code
+app.put("/stores/:code", (req, res) => {
+	const store = stores.find((u) => u.code === String(req.params.code));
 	if (!store) return res.status(404).send("store not found");
 
 	store.name = req.body.name;
@@ -92,9 +92,9 @@ app.put("/stores/:id", (req, res) => {
 	res.json(store);
 });
 
-// Delete: Delete a store by id
-app.delete("/stores/:id", (req, res) => {
-	const storeIndex = stores.findIndex((u) => u.id === parseInt(req.params.id));
+// Delete: Delete a store by code
+app.delete("/stores/:code", (req, res) => {
+	const storeIndex = stores.findIndex((u) => u.code === String(req.params.code));
 	if (storeIndex === -1) return res.status(404).send("store not found");
 
 	const deletedstore = stores.splice(storeIndex, 1);

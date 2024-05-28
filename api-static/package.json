@@ -6,12 +6,12 @@
 		"mysql2": "^3.9.7"
 	},
 	"scripts": {
-		"start": "node --watch index.js",
-		"start:nodemon": "nodemon index.js"
+		"start": "node --watch server.js",
+		"start:nodemon": "nodemon server.js"
 	},
-	"name": "api",
+	"name": "api-umkm-static",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "server.js",
 	"devDependencies": {},
 	"keywords": [],
 	"author": "",

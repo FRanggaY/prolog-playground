@@ -145,9 +145,9 @@ table_store_row(Store) -->
         td(Store.code),
         td(Store.name),
         td(div(class='d-flex gap-2',[
-            a([class('btn btn-primary'), href('/store_detail?code=' + Store.code)], 'Detail'),
-            a([class('btn btn-warning'), href('/store_edit?code=' + Store.code)], 'Edit'),
-            button([type(button), class('btn btn-danger'), onclick('deleteStore(' + Store.code + ')')], 'Delete')
+            a([class('btn btn-primary'), href('/store_detail?store_code=' + Store.code)], 'Detail'),
+            a([class('btn btn-warning'), href('/store_edit?store_code=' + Store.code)], 'Edit'),
+            button([type(button), class('btn btn-danger'), onclick('deleteStore("' + Store.code + '")')], 'Delete')
         ]))
     ])).
 
@@ -173,6 +173,10 @@ add_store_handler(_Request) :-
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
                     form([action='/submit_store', method='POST', autocomplete='off'], [                        
+                        div(class='mb-3', [
+                            label([class='form-label', for='inputCode'], 'Code'),
+                            input([class='form-control', id='inputCode', type='text', name='code'])
+                        ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputName'], 'Nama'),
                             input([class='form-control', id='inputName', type='text', name='name'])
@@ -204,9 +208,9 @@ add_store_handler(_Request) :-
 % Handler for the /store_edit endpoint
 store_edit_handler(Request) :-
     % Extract the store ID from the request parameters
-    http_parameters(Request, [code(Code, [])]),
+    http_parameters(Request, [store_code(StoreCode, [])]),
     % Construct the URL for the API request
-    atom_concat('http://localhost:3000/stores/', Code, Url),
+    atom_concat('http://localhost:3000/stores/', StoreCode, Url),
     % Attempt to fetch data from the API
     (   catch(
             (   http_open(Url, Stream, []),
@@ -296,10 +300,10 @@ json_data(JSON, Data) :-
     dict_create(JSON, json, Data).
 
 submit_store_handler(Request) :-
-    http_parameters(Request, [name(Name, []), owner_name(OwnerName, []), description(Description, []), address(Address, []), category(Category, [])]), % Extract form parameters
+    http_parameters(Request, [code(Code, []), name(Name, []), owner_name(OwnerName, []), description(Description, []), address(Address, []), category(Category, [])]), % Extract form parameters
     
     % Now, you can send the data to the API endpoint (localhost:8000/stores) using HTTP client predicates like http_post/4
-    json_data(JSON, [name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]),
+    json_data(JSON, [code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]),
     % Send POST request to the API endpoint
     catch(
         http_post('http://localhost:3000/stores', json(JSON), Response, []),
@@ -621,10 +625,10 @@ html_bootstrap_head -->
     html(head([
         link([rel('stylesheet'), href('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')]),
         script(type('text/javascript'), "
-            async function deleteStore(code) {
+            async function deleteStore(storeCode) {
             if (confirm('Are you sure you want to delete this store?')) {
                 try {
-                    const response = await fetch('http://localhost:3000/stores/' + code, {
+                    const response = await fetch('http://localhost:3000/stores/' + storeCode, {
                         method: 'DELETE'
                     });
 
