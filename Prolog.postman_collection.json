@@ -1,0 +1,309 @@
+{
+	"info": {
+		"_postman_id": "ae250c9d-d77c-47c8-a2ed-77007deffd08",
+		"name": "Prolog",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12561642",
+		"_collection_link": "https://ismail-bin-mail.postman.co/workspace/Team-Workspace~42d86441-7f62-4fcb-8452-2a1ee3d7ca37/collection/12561642-ae250c9d-d77c-47c8-a2ed-77007deffd08?action=share&source=collection_link&creator=12561642"
+	},
+	"item": [
+		{
+			"name": "PING",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/ping",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Store",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/stores",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"stores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Store By Code",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/stores/RMP",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"stores",
+						"RMP"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Store",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"code\": \"RHMAP\",\r\n    \"name\": \"Rumah Makan Padang Minang\",\r\n    \"owner_name\": \"Orang Minang\",\r\n    \"description\": \"Asli Padang\",\r\n    \"address\": \"Minang, Padang\",\r\n    \"category\": \"Makanan\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/stores",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"stores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Store",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Rumah Makan Padang\",\r\n    \"owner_name\": \"Orang Minang\",\r\n    \"description\": \"Asli Padang\",\r\n    \"address\": \"Minang, Padang\",\r\n    \"category\": \"Makanan\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/stores/RMP",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"stores",
+						"RMP"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Store",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Rumah Makan Padang\",\r\n    \"owner_name\": \"Orang Minang\",\r\n    \"description\": \"Asli Padang\",\r\n    \"address\": \"Minang, Padang\",\r\n    \"category\": \"Makanan\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/stores/RHMA",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"stores",
+						"RHMA"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Store Review",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{host}}/store-reviews/RMP",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"store-reviews",
+						"RMP"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Store Review",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"store_code\": \"RMP\",\r\n    \"name\": \"KALE\",\r\n    \"description\": \"Sangat Diminati banyak orang terutama orang padang/minang\",\r\n    \"rating\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/store-reviews",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"store-reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Store Recommendation",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/store-recommendation?address=jawa&category",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"store-recommendation"
+					],
+					"query": [
+						{
+							"key": "address",
+							"value": "jawa"
+						},
+						{
+							"key": "category",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "localhost:3000",
+			"type": "string"
+		}
+	]
+}
