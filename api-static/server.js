@@ -20,16 +20,49 @@ let stores = [
 		address: "jalan test",
 		category: "Rumah Makan",
 	},
+	{
+		code: '2',
+		name: "Mie Ayam",
+		owner_name: "budi gas",
+		description: "Enak ini",
+		address: "jalan test new",
+		category: "Rumah Makan",
+	},
 ];
 
 let storeReviews = [
 	{ code: '1', store_code: '1', name: "andi", description: "gk enak", rating: 1 },
-	{ code: '2', store_code: '1', name: "budi", description: "gk enak", rating: 1 },
+	{ code: '2', store_code: '1', name: "budi", description: "gk enak", rating: 3 },
 ];
 
+const calculateAverageRating = (storeCode) => {
+	const reviews = storeReviews.filter(review => review.store_code === storeCode);
+	const totalReviews = reviews.length;
+	const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+	return totalReviews ? (totalRating / totalReviews) : 0;
+};
+
 app.get("/store-recommendation", (req, res) => {
-	// bisa filter query address dan category pakai LIKE
-	// ambil 5 toko dengan rating tertinggi
+	const { address, category } = req.query;
+
+	let filteredStores = stores.filter(store => {
+		return (!address || store.address.toLowerCase().includes(address.toLowerCase())) &&
+			(!category || store.category.toLowerCase().includes(category.toLowerCase()));
+	});
+
+	let storeRatings = filteredStores.map(store => {
+		return {
+			...store,
+			average_rating: calculateAverageRating(store.code),
+			total_reviews: storeReviews.filter(review => review.store_code === store.code).length
+		};
+	});
+
+	// Sort stores by average rating in descending order and get the top 5
+	storeRatings.sort((a, b) => b.average_rating - a.average_rating);
+	let topStores = storeRatings.slice(0, 5);
+
+	res.json(topStores);
 });
 
 // Create: Add a new store
