@@ -66,14 +66,14 @@ home_handler(_Request) :-
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
                     h5(class='card-title mt-2', 'Pencarian rekomendasi'),
-                    form([method='GET', autocomplete='off'], [
+                    form([method='GET', action="recomendation", autocomplete='off'], [
                         div(class='mb-3', [
                             label([class='form-label', for='inputLokasi'], 'Lokasi'),
-                            input([class='form-control', id='inputLokasi', type='text', name='lokasi'])
+                            input([class='form-control', id='inputLokasi', type='text', name='lokasi', placeholder='Bogor'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputKategori'], 'Kategori'),
-                            input([class='form-control', id='inputKategori', type='text', name='kategori'])
+                            input([class='form-control', id='inputKategori', type='text', name='kategori', placeholder='Otomotif'])
                         ]),
                         button([type="submit", class="btn btn-primary"], 'Cari')
                     ])
@@ -128,7 +128,7 @@ store_list(Stores) -->
 % Table header for the store list
 table_store_header -->
     html(thead(tr([
-        th('ID'),
+        th('Code'),
         th('Name'),
         th('Actions')
     ]))).
@@ -545,7 +545,7 @@ store_review_list(StoreReviews) -->
 % Table header for the store review list
 table_store_review_header -->
     html(thead(tr([
-        th('ID'),
+        th('Code'),
         th('Name'),
         th('Description'),
         th('Rating')
