@@ -43,6 +43,9 @@
 % Handler saving store
 :- http_handler(root(submit_store_review), submit_store_review_handler, [method(post)]).
 
+% Handler recommendation store
+:- http_handler(root(recommendation), recommendation_store_handler, []).
+
 % home or landing page
 home_handler(_Request) :-
     reply_html_page(
@@ -66,7 +69,7 @@ home_handler(_Request) :-
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
                     h5(class='card-title mt-2', 'Pencarian rekomendasi'),
-                    form([method='GET', action="recomendation", autocomplete='off'], [
+                    form([method='GET', action="/recommendation", autocomplete='off'], [
                         div(class='mb-3', [
                             label([class='form-label', for='inputLokasi'], 'Lokasi'),
                             input([class='form-control', id='inputLokasi', type='text', name='lokasi', placeholder='Bogor'])
@@ -82,6 +85,63 @@ home_handler(_Request) :-
         ])
     ).
 
+recommendation_store_handler(Request) :-
+    setup_call_cleanup(
+        http_open('http://localhost:3000/store-recommendation?address=&category=', Stream, []),
+        json_read_dict(Stream, Stores),
+        close(Stream)
+    ),
+    reply_html_page(
+        title('Rekomendasi UMKM'),
+        \html_bootstrap_head,
+        div([  
+            div(class='p-4 bg-primary text-white', [
+                div([
+                    h5('Website UMKM')
+                ])
+            ]),
+            div(class='card mx-5 mt-4', [
+                div(class='card-body', [
+                    h5(class='card-title mt-2', 'Rekomendasi Toko UMKM'),
+                    div(class='d-flex gap-2 flex-wrap',[
+                        a([class='btn btn-primary', href='/'], 'Kembali')
+                    ])
+                ])
+            ]),
+            div(class('card mx-5 mt-4'), [
+                \store_recommended(Stores)
+            ])
+        ])
+    ).
+
+store_recommended(Stores) -->
+    html([
+        table(class('table'), [
+            \table_recommended_header,
+            tbody(\table_recommended_rows(Stores))
+        ])
+    ]).
+
+table_recommended_header -->
+    html(thead(tr([
+        th('Name'),
+        th('Owner'),
+        th('Description'),
+        th('Rating')
+    ]))).
+
+table_recommended_rows([]) --> [].
+table_recommended_rows([Store|Rest]) -->
+    table_recommended_row(Store),
+    table_recommended_rows(Rest).
+
+table_recommended_row(Store) -->
+    html(tr([
+        td(Store.name),
+        td(Store.owner_name),
+        td(Store.description),
+        td(Store.average_rating)
+    ])).
 
 % store page
 store_handler(Request) :-
