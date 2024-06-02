@@ -14,20 +14,22 @@ exports.createStore = async (req, res) => {
 	const { code, name, owner_name, description, address, category } = req.body;
 	const sql = `INSERT INTO store (code, name, owner_name, description, address, category) VALUES (?, ?, ?, ?, ?, ?)`;
 	try {
-		const checkStoreCode = await queryDatabase("SELECT * FROM store WHERE code = ?", [code]);
+		const checkStoreCode = await queryDatabase("SELECT * FROM store WHERE code LIKE ?", [`${code}%`]);
 		if (checkStoreCode.length === 0) {
-			await queryDatabase(sql, [code, name, owner_name, description, address, category]);
-			return this.getAllStores(req, res);
 		} else {
-			res.status(500).json({ message: "Duplicate Code!", error: true });
+			await queryDatabase(sql, [`${code}${checkStoreCode.length + 1}`, name, owner_name, description, address, category]);
+			return this.getAllStores(req, res);
+			// res.status(400).send("Duplicate Code!");
+			// res.status(400).json({ message: "Duplicate Code!", error: true });
 		}
 	} catch (error) {
+		console.log({ message: "Error creating store", error: error.message });
 		res.status(500).json({ message: "Error creating store", error: error.message });
 	}
 };
 
 exports.getAllStores = async (req, res) => {
-	const sql = `SELECT * FROM store`;
+	const sql = `SELECT * FROM store order by updated_at desc, created_at desc`;
 	try {
 		const results = await queryDatabase(sql);
 		res.json(results);
@@ -58,7 +60,8 @@ exports.updateStore = async (req, res) => {
 	owner_name = ?,
 	description = ?,
 	address = ?,
-	category = ?
+	category = ?,
+	updated_at = now()
 	where code = ?`;
 	try {
 		await queryDatabase(sql, [name, owner_name, description, address, category, code]);
