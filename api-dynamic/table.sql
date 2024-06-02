@@ -1,5 +1,5 @@
 CREATE TABLE store (
-    code varchar(5) PRIMARY KEY NOT NULL,
+    code varchar(10) PRIMARY KEY NOT NULL,
     name varchar(156) NOT NULL,
     owner_name varchar(156) NOT NULL,
     description varchar(256),
@@ -23,7 +23,7 @@ INSERT INTO store (code, name, owner_name, description, address, category) VALUE
 
 CREATE TABLE store_review (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    store_code varchar(5) NOT NULL,
+    store_code varchar(10) NOT NULL,
     name varchar(156) NOT NULL,
     description varchar(512),
     rating INT NOT NULL,
