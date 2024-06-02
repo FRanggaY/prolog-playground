@@ -235,27 +235,27 @@ add_store_handler(_Request) :-
                     form([action='/submit_store', method='POST', autocomplete='off'], [                        
                         div(class='mb-3', [
                             label([class='form-label', for='inputCode'], 'Code'),
-                            input([class='form-control', id='inputCode', type='text', name='code'])
+                            input([class='form-control', id='inputCode', type='text', name='code', required='required'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputName'], 'Nama'),
-                            input([class='form-control', id='inputName', type='text', name='name'])
+                            input([class='form-control', id='inputName', type='text', name='name', required='required'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputOwnerName'], 'Nama Pemilik'),
-                            input([class='form-control', id='inputOwnerName', type='text', name='owner_name'])
+                            input([class='form-control', id='inputOwnerName', type='text', name='owner_name', required='required'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputDescription'], 'Deskripsi'),
-                            input([class='form-control', id='inputDescription', type='text', name='description'])
+                            input([class='form-control', id='inputDescription', type='text', name='description', required='required'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputAddress'], 'Alamat'),
-                            input([class='form-control', id='inputAddress', type='text', name='address'])
+                            input([class='form-control', id='inputAddress', type='text', name='address', required='required'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputCategory'], 'Kategori'),
-                            input([class='form-control', id='inputCategory', type='text', name='category'])
+                            input([class='form-control', id='inputCategory', type='text', name='category', required='required'])
                         ]),
                         button([type="submit", class="btn btn-primary"], 'Tambah')
                     ])
@@ -307,23 +307,23 @@ store_edit_handler(Request) :-
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputName'], 'Nama'),
-                                input([class='form-control', id='inputName', type='text', name='name', value=Data.get(name)])
+                                input([class='form-control', id='inputName', type='text', name='name', value=Data.get(name), required='required'])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputOwnerName'], 'Nama Pemilik'),
-                                input([class='form-control', id='inputOwnerName', type='text', name='owner_name', value=Data.get(owner_name)])
+                                input([class='form-control', id='inputOwnerName', type='text', name='owner_name', value=Data.get(owner_name), required='required'])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputDescription'], 'Deskripsi'),
-                                input([class='form-control', id='inputDescription', type='text', name='description', value=Data.get(description)])
+                                input([class='form-control', id='inputDescription', type='text', name='description', value=Data.get(description), required='required'])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputAddress'], 'Alamat'),
-                                input([class='form-control', id='inputAddress', type='text', name='address', value=Data.get(address)])
+                                input([class='form-control', id='inputAddress', type='text', name='address', value=Data.get(address), required='required'])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputCategory'], 'Kategori'),
-                                input([class='form-control', id='inputCategory', type='text', name='category', value=Data.get(category)])
+                                input([class='form-control', id='inputCategory', type='text', name='category', value=Data.get(category), required='required'])
                             ]),
                             button([type="submit", class="btn btn-primary"], 'Update')
                         ])
@@ -553,15 +553,15 @@ store_detail_handler(Request) :-
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputName'], 'Nama'),
-                                input([class='form-control', id='inputName', type='text', name='name' ])
+                                input([class='form-control', id='inputName', type='text', name='name', required='required' ])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputDescription'], 'Deskripsi'),
-                                input([class='form-control', id='inputDescription', type='text', name='description' ])
+                                input([class='form-control', id='inputDescription', type='text', name='description', required='required' ])
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputRating'], 'Rating'),
-                                input([class='form-control', id='inputRating', type='number', name='rating' ])
+                                input([class='form-control', id='inputRating', type='number', name='rating', required='required' ])
                             ]),
                             button([type="submit", class="btn btn-primary"], 'Tambah')
                         ]),
