@@ -70,12 +70,26 @@ exports.updateStore = async (req, res) => {
 
 exports.deleteStore = async (req, res) => {
 	const { code } = req.params;
-	const sql = `DELETE FROM store where code = ?`;
+	const sqlDeleteStoreReview = `DELETE FROM store_review WHERE store_code = ?`;
+	const sqlDeleteStore = `DELETE FROM store WHERE code = ?`;
+
+	const connection = await pool.promise().getConnection();
+
 	try {
-		await queryDatabase(sql, [code]);
+		await connection.beginTransaction();
+
+		await queryDatabase(sqlDeleteStoreReview, [code], connection);
+		await queryDatabase(sqlDeleteStore, [code], connection);
+
+		await connection.commit();
+		connection.release();
+
 		return this.getAllStores(req, res);
 	} catch (error) {
-		res.status(500).json({ message: "Error fetching stores", error: error.message });
+		await connection.rollback();
+		connection.release();
+		console.log(error);
+		res.status(500).json({ message: "Error deleting store", error: error.message });
 	}
 };
 
