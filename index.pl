@@ -71,12 +71,8 @@ home_handler(_Request) :-
                     h5(class='card-title mt-2', 'Pencarian rekomendasi'),
                     form([method='GET', action="/recommendation", autocomplete='off'], [
                         div(class='mb-3', [
-                            label([class='form-label', for='inputLokasi'], 'Lokasi'),
-                            input([class='form-control', id='inputLokasi', type='text', name='lokasi', placeholder='Bogor'])
-                        ]),
-                        div(class='mb-3', [
-                            label([class='form-label', for='inputKategori'], 'Kategori'),
-                            input([class='form-control', id='inputKategori', type='text', name='kategori', placeholder='Otomotif'])
+                            label([class='form-label', for='inputLokasi'], 'Address'),
+                            input([class='form-control', id='inputLokasi', type='text', name='address', placeholder='Bogor'])
                         ]),
                         button([type="submit", class="btn btn-primary"], 'Cari')
                     ])
@@ -86,8 +82,10 @@ home_handler(_Request) :-
     ).
 
 recommendation_store_handler(Request) :-
+    http_parameters(Request, [address(Address, [default('')])]),
+    atom_concat('http://localhost:3000/store-recommendation?address=', Address, Url),
     setup_call_cleanup(
-        http_open('http://localhost:3000/store-recommendation?address=&category=', Stream, []),
+        http_open(Url, Stream, []),
         json_read_dict(Stream, Stores),
         close(Stream)
     ),
@@ -127,6 +125,7 @@ table_recommended_header -->
         th('Name'),
         th('Owner'),
         th('Description'),
+        th('Address'),
         th('Rating')
     ]))).
 
@@ -140,6 +139,7 @@ table_recommended_row(Store) -->
         td(Store.name),
         td(Store.owner_name),
         td(Store.description),
+        td(Store.address),
         td(Store.average_rating)
     ])).
 
