@@ -14,22 +14,20 @@ exports.createStore = async (req, res) => {
 	const { code, name, owner_name, description, address, category } = req.body;
 	const sql = `INSERT INTO store (code, name, owner_name, description, address, category) VALUES (?, ?, ?, ?, ?, ?)`;
 	try {
-		const checkStoreCode = await queryDatabase("SELECT * FROM store WHERE code LIKE ?", [`${code}%`]);
+		const checkStoreCode = await queryDatabase("SELECT * FROM store WHERE code = ?", [code]);
 		if (checkStoreCode.length === 0) {
-		} else {
-			await queryDatabase(sql, [`${code}${checkStoreCode.length + 1}`, name, owner_name, description, address, category]);
+			await queryDatabase(sql, [code, name, owner_name, description, address, category]);
 			return this.getAllStores(req, res);
-			// res.status(400).send("Duplicate Code!");
-			// res.status(400).json({ message: "Duplicate Code!", error: true });
+		} else {
+			res.status(500).json({ message: "Duplicate Code!", error: true });
 		}
 	} catch (error) {
-		console.log({ message: "Error creating store", error: error.message });
 		res.status(500).json({ message: "Error creating store", error: error.message });
 	}
 };
 
 exports.getAllStores = async (req, res) => {
-	const sql = `SELECT * FROM store order by updated_at desc, created_at desc`;
+	const sql = `SELECT * FROM store`;
 	try {
 		const results = await queryDatabase(sql);
 		res.json(results);
@@ -60,8 +58,7 @@ exports.updateStore = async (req, res) => {
 	owner_name = ?,
 	description = ?,
 	address = ?,
-	category = ?,
-	updated_at = now()
+	category = ?
 	where code = ?`;
 	try {
 		await queryDatabase(sql, [name, owner_name, description, address, category, code]);
@@ -107,7 +104,7 @@ exports.getStoreReviews = async (req, res) => {
 };
 
 exports.getStoreRecommendation = async (req, res) => {
-	const { address, category } = req.query;
+	const { address } = req.query;
 	const sql = `SELECT 
 			ROUND(AVG(sr.rating), 1) AS average_rating,
 			COUNT(sr.id) AS total_reviews,
@@ -117,14 +114,13 @@ exports.getStoreRecommendation = async (req, res) => {
 		INNER JOIN 
 			store_review sr ON sr.store_code = s.code
 		WHERE UPPER(address) LIKE ?
-		AND UPPER(category) LIKE ?
 		GROUP BY 
 			s.code
 		ORDER BY 
 			average_rating DESC
-		LIMIT 5`;
+		LIMIT 10`;
 	try {
-		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`, `%${category.toUpperCase()}%`]);
+		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`]);
 		res.json(results);
 	} catch (error) {
 		res.status(500).json({ message: "Error fetching reviews", error: error.message });
