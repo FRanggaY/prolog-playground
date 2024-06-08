@@ -124,6 +124,7 @@ table_recommended_header -->
     html(thead(tr([
         th('Name'),
         th('Owner'),
+        th('Category'),
         th('Description'),
         th('Address'),
         th('Rating')
@@ -138,6 +139,7 @@ table_recommended_row(Store) -->
     html(tr([
         td(Store.name),
         td(Store.owner_name),
+        td(Store.category),
         td(Store.description),
         td(Store.address),
         td(Store.average_rating)
