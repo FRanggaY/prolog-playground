@@ -3,6 +3,19 @@
 Install SWI Prolog
 https://www.swi-prolog.org/download/stable
 
+MySQL (can from XAMPP)
+https://www.apachefriends.org/download.html
+
+if you want to setup full crud using Prolog (without API)
+
+MySQL Connectior ODBC
+https://dev.mysql.com/downloads/connector/odbc/
+
+if you want to use API
+
+Node Js
+https://nodejs.org/en/download/package-manager
+
 ## Static API
 
 This for static data so when restart server, data will be reset
@@ -73,6 +86,18 @@ This api is include:
 - Store Recommendations
 
 - Postman support import
+
+## Web CRUD full Prolog
+
+Go to Control Panel -> Performance and Maintenance -> Administrative Tools -> Data Sources (ODBC) Under the dialog tab User DSN, press ADD, select the MySQL ODBC X.Y Unicode Driver.
+In the dialog, enter the following:
+
+Data Source Name : yourdatasourcename 
+Description : optional description
+Server : localhost
+User : yoursettingsdatabaseuser or default is root
+Password : for data source password
+Database : name of your database mysql
 
 ## Web Prolog for frontend
 
