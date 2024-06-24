@@ -43,11 +43,29 @@
 % Handler saving store
 :- http_handler(root(submit_store_review), submit_store_review_handler, [method(post)]).
 
-% Handler recommendation store
-:- http_handler(root(recommendation), recommendation_store_handler, []).
-
 % home or landing page
-home_handler(_Request) :-
+home_handler(Request) :-
+    http_parameters(Request, [address(Address, [default('')]), category(Category, [default('')])]),
+    (   Address \= ''
+    ;   Category \= ''
+    ->  % Parameters are provided, perform the API call
+        format(atom(Url), 'http://localhost:3000/store-recommendation?address=~w&category=~w', [Address, Category]),
+        catch(
+            setup_call_cleanup(
+                http_open(Url, Stream, []),
+                json_read_dict(Stream, Stores),
+                close(Stream)
+            ),
+            Error,
+            (   format('Error fetching recommendations: ~w~n', [Error]),
+                fail
+            )
+        ),
+        DisplayRecommendations = true
+    ;   % No parameters, do not perform the API call
+        Stores = [],
+        DisplayRecommendations = false
+    ),
     reply_html_page(
         title('Beranda'),
         \html_bootstrap_head, % add boostrap link
@@ -69,48 +87,40 @@ home_handler(_Request) :-
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
                     h5(class='card-title mt-2', 'Pencarian rekomendasi'),
-                    form([method='GET', action="/recommendation", autocomplete='off'], [
+                    form([method='GET', action="/", autocomplete='off'], [
                         div(class='mb-3', [
-                            label([class='form-label', for='inputLokasi'], 'Address'),
-                            input([class='form-control', id='inputLokasi', type='text', name='address', placeholder='Bogor'])
+                            label([class='form-label', for='inputAlamat'], 'Alamat'),
+                            input([class='form-control', id='inputAlamat', type='text', name='address', placeholder='Bogor'])
                         ]),
-                        button([type="submit", class="btn btn-primary"], 'Cari')
+                        div(class='mb-3', [
+                            label([class='form-label', for='inputKategori'], 'Kategori'),
+                            input([class='form-control', id='inputKategori', type='text', name='category', placeholder='Rumah Makan'])
+                        ]),
+                        div(class='mb-3 d-flex gap-2', [
+                            button([type="submit", class="btn btn-primary"], 'Cari'),
+                            a([href="/", class="btn btn-primary"], 'Reset')
+                        ])
                     ])
                 ])
-            ])
+            ]),
+            % Conditionally render the recommendations section if parameters are provided
+            \conditional_recommendations_section(DisplayRecommendations, Category, Address, Stores)
         ])
     ).
 
-recommendation_store_handler(Request) :-
-    http_parameters(Request, [address(Address, [default('')])]),
-    atom_concat('http://localhost:3000/store-recommendation?address=', Address, Url),
-    setup_call_cleanup(
-        http_open(Url, Stream, []),
-        json_read_dict(Stream, Stores),
-        close(Stream)
-    ),
-    reply_html_page(
-        title('Rekomendasi UMKM'),
-        \html_bootstrap_head,
-        div([  
-            div(class='p-4 bg-primary text-white', [
-                div([
-                    h5('Website UMKM')
-                ])
-            ]),
-            div(class='card mx-5 mt-4', [
-                div(class='card-body', [
-                    h5(class='card-title mt-2', 'Rekomendasi Toko UMKM'),
-                    div(class='d-flex gap-2 flex-wrap',[
-                        a([class='btn btn-primary', href='/'], 'Kembali')
-                    ])
-                ])
-            ]),
-            div(class('card mx-5 mt-4'), [
-                \store_recommended(Stores)
-            ])
+% Helper to render the recommendations section conditionally
+conditional_recommendations_section(true, Category, Address, Stores) -->
+    html(div(class='card mx-5 mt-4', [
+        div(class='card-body', [
+            h5(class='card-title mt-2', ['Hasil Pencarian : ', Category, ' ',  Address])
         ])
-    ).
+    ])),
+    html(div(class('card mx-5 mt-4'), [
+        \store_recommended(Stores)
+    ])).
+
+conditional_recommendations_section(false, _, _, _) -->
+    html([]).
 
 store_recommended(Stores) -->
     html([
@@ -127,7 +137,8 @@ table_recommended_header -->
         th('Category'),
         th('Description'),
         th('Address'),
-        th('Rating')
+        th('Rating'),
+        th('Aksi')
     ]))).
 
 table_recommended_rows([]) --> [].
@@ -142,7 +153,10 @@ table_recommended_row(Store) -->
         td(Store.category),
         td(Store.description),
         td(Store.address),
-        td(Store.average_rating)
+        td(Store.average_rating),
+        td(div(class='d-flex gap-2',[
+            a([class('btn btn-primary'), href('http://maps.google.com/maps?q=-6.2126966,106.7890963')], 'Menuju Peta')
+        ]))
     ])).
 
 % store page

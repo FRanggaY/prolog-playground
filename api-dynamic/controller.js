@@ -118,7 +118,7 @@ exports.getStoreReviews = async (req, res) => {
 };
 
 exports.getStoreRecommendation = async (req, res) => {
-	const { address } = req.query;
+	const { address, category } = req.query;
 	const sql = `SELECT 
 			ROUND(AVG(sr.rating), 1) AS average_rating,
 			COUNT(sr.id) AS total_reviews,
