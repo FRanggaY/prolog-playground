@@ -155,7 +155,7 @@ table_recommended_row(Store) -->
         td(Store.address),
         td(Store.average_rating),
         td(div(class='d-flex gap-2',[
-            a([class('btn btn-primary'), href('http://maps.google.com/maps?q=-6.2126966,106.7890963')], 'Menuju Peta')
+            a([class('btn btn-primary'), target('_blank'), href('http://maps.google.com/maps?q=-6.2126966,106.7890963')], 'Menuju Peta')
         ]))
     ])).
 
