@@ -577,7 +577,13 @@ store_detail_handler(Request) :-
                             ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputRating'], 'Rating'),
-                                input([class='form-control', id='inputRating', type='number', name='rating', required='required' ])
+                                select([class='form-control', id='inputRating', name='rating', required='required'], [
+                                    option([value='1'], '1'),
+                                    option([value='2'], '2'),
+                                    option([value='3'], '3'),
+                                    option([value='4'], '4'),
+                                    option([value='5'], '5')
+                                ])
                             ]),
                             button([type="submit", class="btn btn-primary"], 'Tambah')
                         ]),
