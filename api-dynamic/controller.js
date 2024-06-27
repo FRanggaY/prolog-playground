@@ -131,7 +131,8 @@ exports.getStoreRecommendation = async (req, res) => {
 		GROUP BY 
 			s.code
 		ORDER BY 
-			average_rating DESC
+			average_rating DESC,
+			s.nama ASC
 		LIMIT 10`;
 	try {
 		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`]);
