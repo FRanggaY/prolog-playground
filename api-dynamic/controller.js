@@ -141,3 +141,30 @@ exports.getStoreRecommendation = async (req, res) => {
 		res.status(500).json({ message: "Error fetching reviews", error: error.message });
 	}
 };
+
+// START REGISTER
+
+exports.register = async (req, res) => {
+	const body = req.body;
+	
+	// Validation field
+	if (!body.username || body.username === "" || body.username === undefined) return res.status(400).json({message: "username is required", code : 400, status: false});
+	if (!body.password || body.password === "" || body.password === undefined) return res.status(400).json({message: "password is required", code : 400, status: false});
+
+	try {
+		// Check existing
+		const queryExist = `SELECT * FROM users WHERE username LIKE ?`;
+		const checkExist = await queryDatabase(queryExist, [`%${body.username}%`]);
+		if (checkExist.length > 0) return res.status(400).json({message : "username already used", code: 400, status: false});
+
+		const newPassword = atob(body.password);
+
+		const queryInsert = `INSERT INTO users (name, username, password) VALUE (?, ? ,?)`;
+		await queryDatabase(queryInsert, [body.name, body.username, newPassword]);
+
+		return res.status(200).json({message : "Success register", code: 200, status: true});
+
+	} catch (error) {
+		return res.status(500).json({ message: "Error fetching reviews", error: error.message });
+	}
+}

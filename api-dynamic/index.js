@@ -15,6 +15,10 @@ app.use(morgan("dev"));
 app.get("/ping", (req, res) => {
 	res.send("PONG!");
 });
+
+// Auth
+app.post("/register", controller.register);
+
 app.get("/stores", controller.getAllStores);
 app.get("/stores/:code", controller.getStoresByCode);
 app.post("/stores", controller.createStore);
