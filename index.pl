@@ -22,6 +22,9 @@
 % handler home or landing page
 :- http_handler(root(.), home_handler, []).
 
+% handler login page
+:- http_handler(root(login), login_handler, []).
+
 % Handler store page
 :- http_handler(root(store), store_handler, []).
 
@@ -80,6 +83,7 @@ home_handler(Request) :-
                     h5(class='card-title mt-2', 'Selamat Datang di Website UMKM'),
                     p(class='', 'Silahkan jelajahi website ini'),
                     div(class='d-flex gap-2 flex-wrap',[
+                        a([class='btn btn-primary', href='/login'], 'Login'),
                         a([class='btn btn-primary', href='/store'], 'Toko')
                     ])
                 ])
@@ -158,6 +162,47 @@ table_recommended_row(Store) -->
             a([class('btn btn-primary'), target('_blank'), href('http://maps.google.com/maps?q=-6.2126966,106.7890963')], 'Menuju Peta')
         ]))
     ])).
+
+% login page
+login_handler(_Request) :-
+    reply_html_page(
+        title('Beranda'),
+        \html_bootstrap_head, % add boostrap link
+        div([  
+            div(class='p-4 bg-primary text-white', [
+                div([
+                    h5('Website UMKM')
+                ])
+            ]),
+            div(class='card mx-5 mt-4', [
+                div(class='card-body', [
+                    h5(class='card-title mt-2', 'Login di Website UMKM'),
+                    p(class='', 'Silahkan login website ini'),
+                    div(class='d-flex gap-2 flex-wrap',[
+                        a([class='btn btn-primary', href='/'], 'Rekomendasi')
+                    ])
+                ])
+            ]),
+            div(class='card mx-5 mt-4', [
+                div(class='card-body', [
+                    form([method='POST', action="/submit_login", autocomplete='off'], [
+                        div(class='mb-3', [
+                            label([class='form-label', for='inputUsername'], 'Username'),
+                            input([class='form-control', id='inputUsername', type='text', name='username', placeholder='Username'])
+                        ]),
+                        div(class='mb-3', [
+                            label([class='form-label', for='inputPassword'], 'Password'),
+                            input([class='form-control', id='inputPassword', type='password', name='password', placeholder='Password'])
+                        ]),
+                        div(class='mb-3 d-flex gap-2', [
+                            button([type="submit", class="btn btn-primary"], 'Login')
+                        ])
+                    ])
+                ])
+            ])
+        ])
+    ).
+    
 
 % store page
 store_handler(Request) :-
