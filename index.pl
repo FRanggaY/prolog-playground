@@ -704,7 +704,7 @@ server(Port) :-
 
 % CDN Boostrap
 html_bootstrap_head -->
-    html(head([
+    html([
         link([rel('stylesheet'), href('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')]),
         script(type('text/javascript'), "
             async function deleteStore(storeCode) {
@@ -728,4 +728,4 @@ html_bootstrap_head -->
             }
         }
         ")
-    ])).
+    ]).
