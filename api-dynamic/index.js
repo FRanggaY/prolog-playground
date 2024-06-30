@@ -22,6 +22,8 @@ app.get("/ping", (req, res) => {
 app.post("/register", controller.register);
 app.post("/login", controller.login);
 
+app.get("/profile", middleware.validToken, controller.getProfile);
+
 app.get("/stores", controller.getAllStores);
 app.get("/stores/:code", controller.getStoresByCode);
 app.post("/stores", middleware.validToken ,controller.createStore);

@@ -196,3 +196,16 @@ exports.login = async (req, res) => {
 		return res.status(500).json({ message: "Error fetching reviews", error: error.message });
 	}
 }
+
+exports.getProfile = async (req, res) => {
+	const body = req.body;
+	try {
+		const queryExist = `SELECT id, name, username FROM users WHERE username LIKE ?`;
+		const checkExist = await queryDatabase(queryExist, [`%${body.user_token}%`]);
+		if (checkExist.length < 1) return res.status(404).json({message : "user not found", code: 404, status: false});
+
+		return res.json(checkExist);
+	} catch (error) {
+		return res.status(500).json({ message: "Error fetching reviews", error: error.message });
+	}
+}

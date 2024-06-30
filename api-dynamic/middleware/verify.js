@@ -10,6 +10,8 @@ exports.validToken = async (req, res, next) => {
         jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decode) => {
             if (err) return res.status(400).json({message: "Token Is Expired", code : 400, status: false});
 
+            req.body.user_token = decode.username;
+
             next();
         })
 
