@@ -1,5 +1,7 @@
 // controller.js
 const pool = require("./database");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 function queryDatabase(sql, params) {
 	return new Promise((resolve, reject) => {
@@ -146,6 +148,7 @@ exports.getStoreRecommendation = async (req, res) => {
 
 exports.register = async (req, res) => {
 	const body = req.body;
+	const saltArround = 10;
 	
 	// Validation field
 	if (!body.username || body.username === "" || body.username === undefined) return res.status(400).json({message: "username is required", code : 400, status: false});
@@ -157,13 +160,38 @@ exports.register = async (req, res) => {
 		const checkExist = await queryDatabase(queryExist, [`%${body.username}%`]);
 		if (checkExist.length > 0) return res.status(400).json({message : "username already used", code: 400, status: false});
 
-		const newPassword = atob(body.password);
+		let salt = await bcrypt.genSaltSync(saltArround);
+		const newPassword = bcrypt.hashSync(body.password, salt);
 
 		const queryInsert = `INSERT INTO users (name, username, password) VALUE (?, ? ,?)`;
 		await queryDatabase(queryInsert, [body.name, body.username, newPassword]);
 
 		return res.status(200).json({message : "Success register", code: 200, status: true});
 
+	} catch (error) {
+		return res.status(500).json({ message: "Error fetching reviews", error: error.message });
+	}
+}
+
+exports.login = async (req, res) => {
+	const body = req.body;
+	try {
+		// Check existing
+		const queryExist = `SELECT * FROM users WHERE username LIKE ?`;
+		const checkExist = await queryDatabase(queryExist, [`%${body.username}%`]);
+		if (checkExist.length < 1) return res.status(404).json({message : "User not found", code: 404, status: false});
+
+		// Validation Password
+		const hashedPass = checkExist[0].password;
+		const inputPassword = body.password;
+
+		let compire = await bcrypt.compareSync(inputPassword, hashedPass);
+
+		if (!compire) return res.status(400).json({message : "Password Not Match", code: 400, status: false});
+		const token = await jwt.sign(body, process.env.JWT_SECRET_KEY, {expiresIn : '1h'});
+
+		return res.status(200).json({message : "Success login", data : {token} ,code: 200, status: true}); 
+	
 	} catch (error) {
 		return res.status(500).json({ message: "Error fetching reviews", error: error.message });
 	}
