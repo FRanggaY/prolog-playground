@@ -3,6 +3,8 @@ CREATE TABLE store (
     name varchar(156) NOT NULL,
     owner_name varchar(156) NOT NULL,
     description varchar(256),
+    lat varchar(100),
+    long varchar(100),
     address varchar(256) NOT NULL,
     category varchar(156) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
