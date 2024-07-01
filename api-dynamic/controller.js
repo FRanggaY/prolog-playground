@@ -129,15 +129,15 @@ exports.getStoreRecommendation = async (req, res) => {
 			store s
 		INNER JOIN 
 			store_review sr ON sr.store_code = s.code
-		WHERE UPPER(address) LIKE ?
+		WHERE UPPER(address) LIKE ? AND UPPER(category) LIKE ?
 		GROUP BY 
 			s.code
 		ORDER BY 
 			average_rating DESC,
-			s.nama ASC
+			s.name ASC
 		LIMIT 10`;
 	try {
-		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`]);
+		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`, `%${category.toUpperCase()}%`]);
 		res.json(results);
 	} catch (error) {
 		res.status(500).json({ message: "Error fetching reviews", error: error.message });

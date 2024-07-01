@@ -3,8 +3,8 @@ CREATE TABLE store (
     name varchar(156) NOT NULL,
     owner_name varchar(156) NOT NULL,
     description varchar(256),
-    lat varchar(100),
-    long varchar(100),
+    lattidue varchar(100),
+    longitude varchar(100),
     address varchar(256) NOT NULL,
     category varchar(156) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -55,17 +55,6 @@ INSERT INTO store_review (store_code, name, description, rating) VALUES
 ('PKS', 'Review Ayam Bakar 2', 'Suasana nyaman, ayam bakarnya juga tidak terlalu berminyak.', 4),
 ('RSC', 'Review Sambal 1', 'Sambalnya pedas meresap, sangat cocok dengan nasi hangat.', 5),
 ('RSC', 'Review Sambal 2', 'Varian sambal banyak, makanannya juga halal.', 4);
-
-CREATE TABLE store_review (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    store_code varchar(10) NOT NULL,
-    name varchar(156) NOT NULL,
-    description varchar(512),
-    rating INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (store_code) REFERENCES store(code)
-);
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,

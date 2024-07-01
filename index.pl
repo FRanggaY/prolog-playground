@@ -49,26 +49,20 @@
 % home or landing page
 home_handler(Request) :-
     http_parameters(Request, [address(Address, [default('')]), category(Category, [default('')])]),
-    (   Address \= ''
-    ;   Category \= ''
-    ->  % Parameters are provided, perform the API call
-        format(atom(Url), 'http://localhost:3000/store-recommendation?address=~w&category=~w', [Address, Category]),
-        catch(
-            setup_call_cleanup(
-                http_open(Url, Stream, []),
-                json_read_dict(Stream, Stores),
-                close(Stream)
-            ),
-            Error,
-            (   format('Error fetching recommendations: ~w~n', [Error]),
-                fail
-            )
+    % Parameters are provided, perform the API call
+    format(atom(Url), 'http://localhost:3000/store-recommendation?address=~w&category=~w', [Address, Category]),
+    catch(
+        setup_call_cleanup(
+            http_open(Url, Stream, []),
+            json_read_dict(Stream, Stores),
+            close(Stream)
         ),
-        DisplayRecommendations = true
-    ;   % No parameters, do not perform the API call
-        Stores = [],
-        DisplayRecommendations = false
+        Error,
+        (   format('Error fetching recommendations: ~w~n', [Error]),
+            fail
+        )
     ),
+    DisplayRecommendations = true,
     reply_html_page(
         title('Beranda'),
         \html_bootstrap_head, % add boostrap link
@@ -94,11 +88,11 @@ home_handler(Request) :-
                     form([method='GET', action="/", autocomplete='off'], [
                         div(class='mb-3', [
                             label([class='form-label', for='inputAlamat'], 'Alamat'),
-                            input([class='form-control', id='inputAlamat', type='text', name='address', placeholder='Bogor'])
+                            input([class='form-control', id='inputAlamat', type='text', name='address', placeholder='Bogor', required='required'])
                         ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputKategori'], 'Kategori'),
-                            input([class='form-control', id='inputKategori', type='text', name='category', placeholder='Rumah Makan'])
+                            input([class='form-control', id='inputKategori', type='text', name='category', placeholder='Rumah Makan', required='required'])
                         ]),
                         div(class='mb-3 d-flex gap-2', [
                             button([type="submit", class="btn btn-primary"], 'Cari'),
@@ -151,6 +145,9 @@ table_recommended_rows([Store|Rest]) -->
     table_recommended_rows(Rest).
 
 table_recommended_row(Store) -->
+    {
+        format(atom(GoogleMapsUrl), 'http://maps.google.com/maps?q=~w,~w', [Store.lattidue, Store.longitude])
+    },
     html(tr([
         td(Store.name),
         td(Store.owner_name),
@@ -159,7 +156,7 @@ table_recommended_row(Store) -->
         td(Store.address),
         td(Store.average_rating),
         td(div(class='d-flex gap-2',[
-            a([class('btn btn-primary'), target('_blank'), href('http://maps.google.com/maps?q=-6.2126966,106.7890963')], 'Menuju Peta')
+            a([class('btn btn-primary'), target('_blank'), href(GoogleMapsUrl)], 'Menuju Peta')
         ]))
     ])).
 
