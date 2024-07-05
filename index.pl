@@ -9,6 +9,7 @@
 :- use_module(library(http/http_client)).
 
 :- use_module(library(http/http_json)).
+:- use_module(library(http/http_session)).
 
 % Declare dynamic predicates
 :- dynamic store_list/1.
@@ -24,6 +25,9 @@
 
 % handler login page
 :- http_handler(root(login), login_handler, []).
+
+% Handler Action Login
+:- http_handler(root(submit_login), submit_login_handler, [method(post)]).
 
 % Handler store page
 :- http_handler(root(store), store_handler, []).
@@ -182,7 +186,7 @@ login_handler(_Request) :-
             ]),
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
-                    form([method='POST', action="/submit_login", autocomplete='off'], [
+                    form([method='POST', action='/submit_login', autocomplete='off'], [
                         div(class='mb-3', [
                             label([class='form-label', for='inputUsername'], 'Username'),
                             input([class='form-control', id='inputUsername', type='text', name='username', placeholder='Username'])
@@ -199,7 +203,41 @@ login_handler(_Request) :-
             ])
         ])
     ).
-    
+
+% Submit Login
+submit_login_handler(Request) :-
+    http_parameters(Request, [
+        username(Username, [string]),
+        password(Password, [string])
+    ]),
+    catch(
+        http_post('http://localhost:3000/login',
+                  json(json([username=Username, password=Password])),
+                  Reply, [json_object(dict)]),
+        Error,
+        (reply_html_page(
+            title('Login Gagal'),
+            [h1('Login Gagal'),
+             p('Tidak dapat menghubungi server:'),
+             p(Error)]
+        ), fail)
+    ),
+    (   Reply.get(status) == true
+    -> % Initialize session and store the token
+        http_session_assert(token(Reply.data.get(token))),  
+        reply_html_page(
+            title('Login Berhasil'),
+            [h1('Login Berhasil'),
+             p('Selamat datang, ', Username),
+             p('Akses token: ', Reply.data.get(token))]
+        )
+    ;   reply_html_page(
+            title('Login Gagal'),
+            [h1('Login Gagal'),
+             p('Username atau password salah.')]
+        )
+    ).
+
 
 % store page
 store_handler(Request) :-
