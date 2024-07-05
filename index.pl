@@ -10,6 +10,7 @@
 
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_session)).
+:- use_module(library(http/http_header)).
 
 % Declare dynamic predicates
 :- dynamic store_list/1.
@@ -210,37 +211,94 @@ submit_login_handler(Request) :-
         username(Username, [string]),
         password(Password, [string])
     ]),
-    catch(
-        http_post('http://localhost:3000/login',
-                  json(json([username=Username, password=Password])),
-                  Reply, [json_object(dict)]),
-        Error,
-        (reply_html_page(
-            title('Login Gagal'),
-            [h1('Login Gagal'),
-             p('Tidak dapat menghubungi server:'),
-             p(Error)]
-        ), fail)
-    ),
-    (   Reply.get(status) == true
-    -> % Initialize session and store the token
-        http_session_assert(token(Reply.data.get(token))),  
-        reply_html_page(
-            title('Login Berhasil'),
-            [h1('Login Berhasil'),
-             p('Selamat datang, ', Username),
-             p('Akses token: ', Reply.data.get(token))]
+    
+    (   catch(
+            http_post('http://localhost:3000/login',
+                      json(json([username=Username, password=Password])),
+                      Reply, [json_object(dict)]),
+            Error,
+            (   format(string(ErrorMessage), '~w', [Error]),
+                reply_html_page(
+                    title('Login Gagal'),
+                    \html_bootstrap_head, % add boostrap link
+                    div([  
+                        div(class='p-4 bg-primary text-white', [
+                            div([
+                                h5('Website UMKM')
+                            ])
+                        ]),
+                        div(class='card mx-5 mt-4', [
+                            div(class='card-body', [
+                                h5(class='card-title mt-2', 'Toko UMKM'),
+                                p('Tidak dapat menghubungi server:'),
+                                p(ErrorMessage),
+                                div(class='d-flex gap-2 flex-wrap',[
+                                    a([class='btn btn-primary', href='/login'], 'Kembali')
+                                ])
+                            ])
+                        ])
+                    ])
+                ), fail
+            )
         )
-    ;   reply_html_page(
+    ->  (   Reply.get(status) == true
+        ->  % Set a cookie with the token
+            format(string(Cookie), 'token=~w; Path=/; HttpOnly', [Reply.data.get(token)]),
+            format('Set-Cookie: ~w~n', [Cookie]),  % Debug: Print the Set-Cookie header
+            reply_html_page(
+                title('Login Berhasil'),
+                \html_bootstrap_head, % add boostrap link
+                div([  
+                    div(class='p-4 bg-primary text-white', [
+                        div([
+                            h5('Website UMKM')
+                        ])
+                    ]),
+                    div(class='card mx-5 mt-4', [
+                        div(class='card-body', [
+                            h5(class='card-title mt-2', 'Toko UMKM'),
+                            p(['Selamat datang, ', Username]),
+                            div(class='d-flex gap-2 flex-wrap',[
+                                a([class='btn btn-primary', href='/store'], 'Toko')
+                            ])
+                        ])
+                    ])
+                ])
+            )
+        ;   reply_html_page(
+                title('Login Gagal'),
+                [h1('Login Gagal'),
+                 p('Username atau password salah.')]
+            )
+        )
+    ;   % Handle unexpected errors gracefully
+        reply_html_page(
             title('Login Gagal'),
-            [h1('Login Gagal'),
-             p('Username atau password salah.')]
+            div(class='card mx-5 mt-4', [
+                div(class='card-body', [
+                    h5(class='card-title mt-2', 'Login Gagal'),
+                    p('Terjadi kesalahan yang tidak terduga. Silakan coba lagi nanti.')
+                ])
+            ])
         )
     ).
 
 
 % store page
+% Extracts a cookie value from the SWI HTTP request object
+% Fails if either no cookie list in request or cookie Name not found
+http_cookie_value(Request, Name, Value) :-
+    % cookie list must exist in the request, and will live in CookieList
+    memberchk(cookie(CookieList), Request),
+    % find one cookie in the cookie list whose Name is Value
+    nth1(_, CookieList, Name=Value).
+
 store_handler(Request) :-
+    % Extract token from cookies using http_cookie_value/3
+    (   http_cookie_value(Request, token, _Token)
+    ->  TokenPresent = true
+    ;   TokenPresent = false
+    ),
     % Fetch data from API using http_open/3
     setup_call_cleanup(
         http_open('http://localhost:3000/stores', Stream, []),
@@ -250,8 +308,8 @@ store_handler(Request) :-
     % Generate HTML
     reply_html_page(
         title('UMKM | Toko'),
-        \html_bootstrap_head, % add boostrap link
-        div([  
+        \html_bootstrap_head, % add bootstrap link
+        div([
             div(class='p-4 bg-primary text-white', [
                 div([
                     h5('Website UMKM')
@@ -262,41 +320,51 @@ store_handler(Request) :-
                     h5(class='card-title mt-2', 'Toko UMKM'),
                     div(class='d-flex gap-2 flex-wrap',[
                         a([class='btn btn-primary', href='/'], 'Kembali'),
-                        a([class='btn btn-primary', href='/add_store'], 'Tambah')
+                        \maybe_add_button(TokenPresent)
                     ])
                 ])
             ]),
             div(class('card mx-5 mt-4'), [
-                \store_list(Stores)
+                \store_list(Stores, TokenPresent)
             ])
         ])
     ).
 
+% Conditionally render the "Tambah" button
+maybe_add_button(true) -->
+    html(a([class='btn btn-primary', href='/add_store'], 'Tambah')).
+maybe_add_button(false) --> [].
+
 % Generate store list table
-store_list(Stores) -->
+store_list(Stores, TokenPresent) -->
     html([
         table(class('table'), [
-            \table_store_header,
-            tbody(\table_store_rows(Stores))
+            \table_store_header(TokenPresent),
+            tbody(\table_store_rows(Stores, TokenPresent))
         ])
     ]).
 
 % Table header for the store list
-table_store_header -->
+table_store_header(true) -->
     html(thead(tr([
         th('Code'),
         th('Name'),
         th('Actions')
     ]))).
+table_store_header(false) -->
+    html(thead(tr([
+        th('Code'),
+        th('Name')
+    ]))).
 
 % Generate table rows for each store
-table_store_rows([]) --> [].
-table_store_rows([Store|Rest]) -->
-    table_store_row(Store),
-    table_store_rows(Rest).
+table_store_rows([], _) --> [].
+table_store_rows([Store|Rest], TokenPresent) -->
+    table_store_row(Store, TokenPresent),
+    table_store_rows(Rest, TokenPresent).
 
 % Generate a table row for a single store
-table_store_row(Store) -->
+table_store_row(Store, true) -->
     html(tr([
         td(Store.code),
         td(Store.name),
@@ -304,6 +372,14 @@ table_store_row(Store) -->
             a([class('btn btn-primary'), href('/store_detail?store_code=' + Store.code)], 'Detail'),
             a([class('btn btn-warning'), href('/store_edit?store_code=' + Store.code)], 'Edit'),
             button([type(button), class('btn btn-danger'), onclick('deleteStore("' + Store.code + '")')], 'Delete')
+        ]))
+    ])).
+table_store_row(Store, false) -->
+    html(tr([
+        td(Store.code),
+        td(Store.name),
+        td(div(class='d-flex gap-2',[
+            a([class('btn btn-primary'), href('/store_detail?store_code=' + Store.code)], 'Detail')
         ]))
     ])).
 
