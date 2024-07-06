@@ -243,7 +243,7 @@ submit_login_handler(Request) :-
         )
     ->  (   Reply.get(status) == true
         ->  % Set a cookie with the token
-            format(string(Cookie), 'token=~w; Path=/; HttpOnly', [Reply.data.get(token)]),
+            format(string(Cookie), 'token=~w; Path=/;', [Reply.data.get(token)]),
             format('Set-Cookie: ~w~n', [Cookie]),  % Debug: Print the Set-Cookie header
             reply_html_page(
                 title('Login Berhasil'),
@@ -532,45 +532,81 @@ json_data(JSON, Data) :-
     dict_create(JSON, json, Data).
 
 submit_store_handler(Request) :-
-    http_parameters(Request, [code(Code, []), name(Name, []), owner_name(OwnerName, []), description(Description, []), address(Address, []), category(Category, [])]), % Extract form parameters
+    % Extract token from cookies using http_cookie_value/3
+    (   http_cookie_value(Request, token, Token)
+    ->  TokenPresent = true
+    ;   TokenPresent = false
+    ),
     
-    % Now, you can send the data to the API endpoint (localhost:8000/stores) using HTTP client predicates like http_post/4
+    % Extract form parameters
+    http_parameters(Request, [
+        code(Code, []),
+        name(Name, []),
+        owner_name(OwnerName, []),
+        description(Description, []),
+        address(Address, []),
+        category(Category, [])
+    ]), 
+    
+    % Create JSON data
     json_data(JSON, [code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]),
-    % Send POST request to the API endpoint
-    catch(
-        http_post('http://localhost:3000/stores', json(JSON), Response, []),
-        Error,
-        handle_error(Error)
+    
+    % Define headers with the Authorization Bearer token
+    (   TokenPresent
+    ->  format(atom(AuthHeader), 'Bearer ~w', [Token]),
+        Headers = [request_header('Authorization'=AuthHeader), request_header('Content-Type'='application/json')]
+    ;   Headers = [request_header('Content-Type'='application/json')]
     ),
 
+    % Send POST request to the API endpoint
+    catch(
+        http_post('http://localhost:3000/stores', json(JSON), Response, Headers),
+        Error,
+        (   format('Error: ~w~n', [Error]),
+            fail
+        )
+    ),
+    
     % If there was no error, print success message
     (   var(Error) % Check if there was no error
     ->  reply_html_page(
-        title('UMKM | Tambah Toko'),
-        \html_bootstrap_head, % add boostrap link
-        div([  
-            div(class='p-4 bg-primary text-white', [
-                div([
-                    h5('Website UMKM')
-                ])
-            ]),
-            div(class='card mx-5 mt-4', [
-                div(class='card-body', [
-                    h5(class='card-title mt-2', ['Store dengan nama ', Name, ' berhasil ditambahkan.']),
-                    div(class='d-flex gap-2 flex-wrap',[
-                        a([class='btn btn-primary', href='/store'], 'Kembali')
+            title('UMKM | Tambah Toko'),
+            \html_bootstrap_head, % add bootstrap link
+            div([  
+                div(class='p-4 bg-primary text-white', [
+                    div([
+                        h5('Website UMKM')
+                    ])
+                ]),
+                div(class='card mx-5 mt-4', [
+                    div(class='card-body', [
+                        h5(class='card-title mt-2', ['Store dengan nama ', Name, ' berhasil ditambahkan.']),
+                        div(class='d-flex gap-2 flex-wrap',[
+                            a([class='btn btn-primary', href='/store'], 'Kembali')
+                        ])
                     ])
                 ])
             ])
-        ])
-    )
+        )
     ;   true % Do nothing if there was an error, as its already handled
     ).
+
 
 json_edit_data(json(Data), json(Data)).
 
 % Handler for submitting the edited store
 submit_edit_store_handler(Request) :-
+    % Extract token from cookies using http_cookie_value/3
+    (   http_cookie_value(Request, token, Token)
+    ->  TokenPresent = true
+    ;   TokenPresent = false
+    ),
+    % Define headers with the Authorization Bearer token
+    (   TokenPresent
+    ->  format(atom(AuthHeader), 'Bearer ~w', [Token]),
+        Headers = [request_header('Authorization'=AuthHeader), request_header('Content-Type'='application/json')]
+    ;   Headers = [request_header('Content-Type'='application/json')]
+    ),
     % Extract form parameters
     (   http_parameters(Request, [
             code(Code, []),
@@ -585,7 +621,7 @@ submit_edit_store_handler(Request) :-
         format(atom(Url), 'http://localhost:3000/stores/~w', [Code]),
         % Attempt to send the PUT request to the API endpoint
         (   catch(
-                http_put(Url, json(JSON), Response, []),
+                http_put(Url, json(JSON), Response, Headers),
                 Error,
                 (handle_error(Error), fail)
             )
@@ -862,26 +898,53 @@ server(Port) :-
 html_bootstrap_head -->
     html([
         link([rel('stylesheet'), href('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')]),
-        script(type('text/javascript'), "
+        script(type('text/javascript'), [
+            '
             async function deleteStore(storeCode) {
-            if (confirm('Are you sure you want to delete this store?')) {
-                try {
-                    const response = await fetch('http://localhost:3000/stores/' + storeCode, {
-                        method: 'DELETE'
-                    });
+                if (confirm(\'Are you sure you want to delete this store?\')) {
+                    try {
+                        function getCookie(cname) {
+                            let name = cname + "=";
+                            let decodedCookie = decodeURIComponent(document.cookie);
+                            console.log(document.cookie);
+                            console.log(decodedCookie);
+                            let ca = decodedCookie.split(\';\');
+                            for(let i = 0; i < ca.length; i++) {
+                                let c = ca[i];
+                                while (c.charAt(0) == \' \') {
+                                    c = c.substring(1);
+                                }
+                                if (c.indexOf(name) == 0) {
+                                    return c.substring(name.length, c.length);
+                                }
+                            }
+                            return "";
+                        }
 
-                    if (response.ok) {
-                        alert('Store deleted successfully');
-                        location.reload();
-                    } else {
-                        alert('Failed to delete store');
+                        const token = getCookie(\'token\');
+                        console.log(token)
+
+                        // Fetch request with Authorization header
+                        const response = await fetch(\'http://localhost:3000/stores/\' + storeCode, {
+                            method: \'DELETE\',
+                            headers: {
+                                \'Authorization\': \'Bearer \' + token
+                            }
+                        });
+
+                        if (response.ok) {
+                            alert(\'Store deleted successfully\');
+                            location.reload();
+                        } else {
+                            alert(\'Failed to delete store\');
+                        }
+                    } catch (error) {
+                        alert(error);
+                        console.error(\'Error deleting store:\', error);
+                        alert(\'Failed to delete store\');
                     }
-                } catch (error) {
-                    alert(error);
-                    console.error('Error deleting store:', error);
-                    alert('Failed to delete store');
                 }
             }
-        }
-        ")
+            '
+        ])
     ]).
