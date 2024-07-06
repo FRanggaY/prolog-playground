@@ -424,6 +424,16 @@ add_store_handler(_Request) :-
                             label([class='form-label', for='inputAddress'], 'Alamat'),
                             input([class='form-control', id='inputAddress', type='text', name='address', required='required'])
                         ]),
+                        div(class='d-flex gap-5', [
+                            div(class='mb-3', [
+                                label([class='form-label', for='inputLattidue'], 'Lattidue'),
+                                input([class='form-control', id='inputLattidue', type='text', name='lattidue', required='required'])
+                            ]),
+                            div(class='mb-3', [
+                                label([class='form-label', for='inputLongitude'], 'Longitude'),
+                                input([class='form-control', id='inputLongitude', type='text', name='longitude', required='required'])
+                            ])
+                        ]),
                         div(class='mb-3', [
                             label([class='form-label', for='inputCategory'], 'Kategori'),
                             input([class='form-control', id='inputCategory', type='text', name='category', required='required'])
@@ -492,6 +502,16 @@ store_edit_handler(Request) :-
                                 label([class='form-label', for='inputAddress'], 'Alamat'),
                                 input([class='form-control', id='inputAddress', type='text', name='address', value=Data.get(address), required='required'])
                             ]),
+                            div(class='d-flex gap-5', [
+                                div(class='mb-3', [
+                                    label([class='form-label', for='inputLattidue'], 'Lattidue'),
+                                    input([class='form-control', id='inputLattidue', type='text', name='lattidue', value=Data.get(lattidue), required='required'])
+                                ]),
+                                div(class='mb-3', [
+                                    label([class='form-label', for='inputLongitude'], 'Longitude'),
+                                    input([class='form-control', id='inputLongitude', type='text', name='longitude', value=Data.get(longitude), required='required'])
+                                ])
+                            ]),
                             div(class='mb-3', [
                                 label([class='form-label', for='inputCategory'], 'Kategori'),
                                 input([class='form-control', id='inputCategory', type='text', name='category', value=Data.get(category), required='required'])
@@ -544,11 +564,13 @@ submit_store_handler(Request) :-
         owner_name(OwnerName, []),
         description(Description, []),
         address(Address, []),
+        lattidue(Lattidue, []),
+        longitude(Longitude, []),
         category(Category, [])
     ]), 
     
     % Create JSON data
-    json_data(JSON, [code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]),
+    json_data(JSON, [code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category, lattidue=Lattidue, longitude=Longitude]),
     
     % Define headers with the Authorization Bearer token
     (   TokenPresent
@@ -613,10 +635,12 @@ submit_edit_store_handler(Request) :-
             owner_name(OwnerName, []),
             description(Description, []),
             address(Address, []),
+            lattidue(Lattidue, []),
+            longitude(Longitude, []),
             category(Category, [])
         ])
     ->  % Ensure all parameters are properly instantiated
-        json_edit_data(json([code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category]), JSON),
+        json_edit_data(json([code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category, lattidue=Lattidue, longitude=Longitude]), JSON),
         format(atom(Url), 'http://localhost:3000/stores/~w', [Code]),
         % Attempt to send the PUT request to the API endpoint
         (   catch(

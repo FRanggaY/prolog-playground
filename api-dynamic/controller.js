@@ -13,12 +13,12 @@ function queryDatabase(sql, params) {
 }
 // CRUD STORE BEGIN
 exports.createStore = async (req, res) => {
-	const { code, name, owner_name, description, address, category } = req.body;
-	const sql = `INSERT INTO store (code, name, owner_name, description, address, category) VALUES (?, ?, ?, ?, ?, ?)`;
+	const { code, name, owner_name, description, address, category, lattidue, longitude } = req.body;
+	const sql = `INSERT INTO store (code, name, owner_name, description, address, category, lattidue, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 	try {
 		const checkStoreCode = await queryDatabase("SELECT * FROM store WHERE code = ?", [code]);
 		if (checkStoreCode.length === 0) {
-			await queryDatabase(sql, [code, name, owner_name, description, address, category]);
+			await queryDatabase(sql, [code, name, owner_name, description, address, category, lattidue, longitude]);
 			return this.getAllStores(req, res);
 		} else {
 			res.status(500).json({ message: "Duplicate Code!", error: true });
@@ -54,16 +54,18 @@ exports.getStoresByCode = async (req, res) => {
 };
 
 exports.updateStore = async (req, res) => {
-	const { name, owner_name, description, address, category, code } = req.body;
+	const { name, owner_name, description, address, category, lattidue, longitude, code } = req.body;
 	const sql = `UPDATE store 
 	set name = ?,
 	owner_name = ?,
 	description = ?,
 	address = ?,
-	category = ?
+	category = ?,
+	lattidue = ?,
+	longitude = ?
 	where code = ?`;
 	try {
-		await queryDatabase(sql, [name, owner_name, description, address, category, code]);
+		await queryDatabase(sql, [name, owner_name, description, address, category, lattidue, longitude, code]);
 		return this.getAllStores(req, res);
 	} catch (error) {
 		res.status(500).json({ message: "Error fetching stores", error: error.message });

@@ -11,17 +11,17 @@ CREATE TABLE store (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO store (code, name, owner_name, description, address, category) VALUES
-('WRT', 'Warung Ratu', 'Ratna', 'Warung makan yang menyediakan masakan khas Sunda.', 'Bandung, Jawa Barat', 'Makanan'),
-('TKG', 'Toko Kue Gembira', 'Budi', 'Menjual berbagai jenis kue tradisional dan modern.', 'Jakarta Selatan, DKI Jakarta', 'Kue'),
-('BGR', 'Bengkel Gita Raya', 'Ahmad', 'Bengkel servis umum untuk berbagai jenis motor.', 'Bogor, Jawa Barat', 'Otomotif'),
-('CSM', 'Casa Mia', 'Maria', 'Restoran Italia dengan chef asli dari Italia.', 'Ubud, Bali', 'Makanan'),
-('KIM', 'Kedai Ikan Mas', 'Siti', 'Spesialis masakan ikan air tawar lokal.', 'Depok, Jawa Barat', 'Makanan'),
-('PST', 'Pusat Oleh-Oleh Istana', 'Joko', 'Menjual berbagai oleh-oleh khas Yogyakarta.', 'Yogyakarta, DIY', 'Souvenir'),
-('SDN', 'Soto Ayam Ndelik', 'Rudi', 'Soto ayam bumbu kuning dengan resep tradisional.', 'Solo, Jawa Tengah', 'Makanan'),
-('TRB', 'Terang Bulan Master', 'Asep', 'Menjual martabak manis dengan berbagai topping.', 'Medan, Sumatera Utara', 'Makanan'),
-('PKS', 'Pak Sastro Ayam Bakar', 'Sastro', 'Ayam bakar dengan bumbu rahasia keluarga.', 'Samarinda, Kalimantan Timur', 'Makanan'),
-('RSC', 'Rumah Sambal Citarasa', 'Dewi', 'Warung spesialis sambal dan masakan pedas.', 'Makassar, Sulawesi Selatan', 'Makanan');
+INSERT INTO store (code, name, owner_name, description, address, category, lattidue, longitude) VALUES
+('WRT', 'Warung Ratu', 'Ratna', 'Warung makan yang menyediakan masakan khas Sunda.', 'Bandung, Jawa Barat', 'Makanan', '-6.917464', '107.619125'),
+('TKG', 'Toko Kue Gembira', 'Budi', 'Menjual berbagai jenis kue tradisional dan modern.', 'Jakarta Selatan, DKI Jakarta', 'Kue', '-6.175110', '106.865036'),
+('BGR', 'Bengkel Gita Raya', 'Ahmad', 'Bengkel servis umum untuk berbagai jenis motor.', 'Bogor, Jawa Barat', 'Otomotif', '-6.597147', '106.806038'),
+('CSM', 'Casa Mia', 'Maria', 'Restoran Italia dengan chef asli dari Italia.', 'Ubud, Bali', 'Makanan', '-8.508230', '115.263100'),
+('KIM', 'Kedai Ikan Mas', 'Siti', 'Spesialis masakan ikan air tawar lokal.', 'Depok, Jawa Barat', 'Makanan', '-6.402484', '106.794243'),
+('PST', 'Pusat Oleh-Oleh Istana', 'Joko', 'Menjual berbagai oleh-oleh khas Yogyakarta.', 'Yogyakarta, DIY', 'Souvenir', '-7.797929', '110.371556'),
+('SDN', 'Soto Ayam Ndelik', 'Rudi', 'Soto ayam bumbu kuning dengan resep tradisional.', 'Solo, Jawa Tengah', 'Makanan', '-7.4944009', '110.4632616'),
+('TRB', 'Terang Bulan Master', 'Asep', 'Menjual martabak manis dengan berbagai topping.', 'Medan, Sumatera Utara', 'Makanan', '3.583033', '98.666816'),
+('PKS', 'Pak Sastro Ayam Bakar', 'Sastro', 'Ayam bakar dengan bumbu rahasia keluarga.', 'Samarinda, Kalimantan Timur', 'Makanan', '-0.5003', '117.150149'),
+('RSC', 'Rumah Sambal Citarasa', 'Dewi', 'Warung spesialis sambal dan masakan pedas.', 'Makassar, Sulawesi Selatan', 'Makanan', '-5.132293', '119.4240869');
 
 CREATE TABLE store_review (
     id INT AUTO_INCREMENT PRIMARY KEY,
