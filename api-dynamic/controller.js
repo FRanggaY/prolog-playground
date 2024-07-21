@@ -21,7 +21,8 @@ exports.createStore = async (req, res) => {
 			await queryDatabase(sql, [code, name, owner_name, description, address, category, lattidue, longitude]);
 			return this.getAllStores(req, res);
 		} else {
-			res.status(500).json({ message: "Duplicate Code!", error: true });
+			await queryDatabase(sql, [`${code}${checkStoreCode.length + 1}`, name, owner_name, description, address, category]);
+			return this.getAllStores(req, res);
 		}
 	} catch (error) {
 		res.status(500).json({ message: "Error creating store", error: error.message });

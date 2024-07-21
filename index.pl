@@ -794,6 +794,7 @@ store_detail_handler(Request) :-
                             div(class='mb-3', [
                                 label([class='form-label', for='inputRating'], 'Rating'),
                                 select([class='form-control', id='inputRating', name='rating', required='required'], [
+                                    option([value=''], 'Pilih Rating'),
                                     option([value='1'], '1'),
                                     option([value='2'], '2'),
                                     option([value='3'], '3'),
