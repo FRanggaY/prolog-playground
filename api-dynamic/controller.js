@@ -133,14 +133,17 @@ exports.getStoreRecommendation = async (req, res) => {
 			store s
 		INNER JOIN 
 			store_review sr ON sr.store_code = s.code
-		WHERE UPPER(address) LIKE ? AND UPPER(category) LIKE ?
-			  AND ROUND(AVG(sr.rating), 1) >= 4
+		WHERE 
+			UPPER(s.address) LIKE ? AND UPPER(s.category) LIKE ?
 		GROUP BY 
 			s.code
+		HAVING 
+			ROUND(AVG(sr.rating), 1) >= 4
 		ORDER BY 
 			average_rating DESC,
 			s.name ASC
-		LIMIT 10`;
+		LIMIT 10;
+		`;
 	try {
 		const results = await queryDatabase(sql, [`%${address.toUpperCase()}%`, `%${category.toUpperCase()}%`]);
 		res.json(results);
