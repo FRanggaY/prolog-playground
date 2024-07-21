@@ -82,6 +82,7 @@ home_handler(Request) :-
                     p(class='', 'Silahkan jelajahi website ini'),
                     div(class='d-flex gap-2 flex-wrap',[
                         a([class='btn btn-primary', href='/login'], 'Login'),
+                        button([type(button), class('btn btn-primary'), onclick('logout()')], 'Logout'),
                         a([class='btn btn-primary', href='/store'], 'Toko')
                     ])
                 ])
@@ -929,8 +930,6 @@ html_bootstrap_head -->
                         function getCookie(cname) {
                             let name = cname + "=";
                             let decodedCookie = decodeURIComponent(document.cookie);
-                            console.log(document.cookie);
-                            console.log(decodedCookie);
                             let ca = decodedCookie.split(\';\');
                             for(let i = 0; i < ca.length; i++) {
                                 let c = ca[i];
@@ -945,7 +944,6 @@ html_bootstrap_head -->
                         }
 
                         const token = getCookie(\'token\');
-                        console.log(token)
 
                         // Fetch request with Authorization header
                         const response = await fetch(\'http://localhost:3000/stores/\' + storeCode, {
@@ -967,6 +965,19 @@ html_bootstrap_head -->
                         alert(\'Failed to delete store\');
                     }
                 }
+            }
+            async function logout() {
+                try {
+                        function deleteCookie(name) {
+                           document.cookie = name + \'=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/\';
+                        }
+                        deleteCookie(\'token\');
+                        alert(\'Logout berhasil\');
+                    } catch (error) {
+                        alert(error);
+                        console.error(\'Error deleting token:\', error);
+                        alert(\'Failed to delete token\');
+                    }
             }
             '
         ])
