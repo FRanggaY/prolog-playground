@@ -32,7 +32,7 @@ app.delete("/stores/:code", middleware.validToken, controller.deleteStore);
 
 // Store Review Routes
 app.get("/store-reviews/:store_code", controller.getStoreReviews);
-app.post("/store-reviews", middleware.validToken, controller.createStoreReview);
+app.post("/store-reviews", controller.createStoreReview);
 
 // Store Recommendation
 app.get("/store-recommendation", controller.getStoreRecommendation);

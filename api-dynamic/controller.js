@@ -123,6 +123,7 @@ exports.getStoreReviews = async (req, res) => {
 
 exports.getStoreRecommendation = async (req, res) => {
 	const { address, category } = req.query;
+	// Recomendation lebih dari rating 4
 	const sql = `SELECT 
 			ROUND(AVG(sr.rating), 1) AS average_rating,
 			COUNT(sr.id) AS total_reviews,
@@ -132,6 +133,7 @@ exports.getStoreRecommendation = async (req, res) => {
 		INNER JOIN 
 			store_review sr ON sr.store_code = s.code
 		WHERE UPPER(address) LIKE ? AND UPPER(category) LIKE ?
+			  AND ROUND(AVG(sr.rating), 1) >= 4
 		GROUP BY 
 			s.code
 		ORDER BY 
