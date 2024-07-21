@@ -725,21 +725,83 @@ submit_store_handler(Request) :-
     ;   Headers = [request_header('Content-Type'='application/json')]
     ),
 
-    % Send POST request to the API endpoint
-    catch(
-        http_post('http://localhost:3000/stores', json(JSON), Response, Headers),
-        Error,
-        (   format('Error: ~w~n', [Error]),
-            fail
+    % Initialize variables
+    (   catch(
+            http_post('http://localhost:3000/stores', json(JSON), Reply, Headers),
+            Error,
+            true)
+    ->  (   var(Error)
+        ->  (   length(Reply, Length), Length > 0
+            ->  % successful
+                reply_html_page(
+                    title('UMKM | Tambah Toko'),
+                    \html_bootstrap_head, % add bootstrap link
+                    div([  
+                        div(class='p-4 bg-primary text-white', [
+                            div([
+                                h5('Website UMKM')
+                            ])
+                        ]),
+                        div(class='card mx-5 mt-4', [
+                            div(class='card-body', [
+                                h5(class='card-title mt-2', ['Store dengan nama ', Name, ' berhasil ditambahkan.']),
+                                div(class='d-flex gap-2 flex-wrap',[
+                                    a([class='btn btn-primary', href='/store'], 'Kembali')
+                                ])
+                            ])
+                        ])
+                    ])
+                )
+            ;   % failed
+                reply_html_page(
+                    title('Gagal'),
+                    \html_bootstrap_head, % add bootstrap link
+                    div([
+                        div(class='p-4 bg-primary text-white', [
+                            div([
+                                h5('Website UMKM')
+                            ])
+                        ]),
+                        div(class='card mx-5 mt-4', [
+                            div(class='card-body', [
+                                h5(class='card-title mt-2', 'Toko UMKM'),
+                                p(Reply.get(message, 'Gagal membuat toko.')),
+                                div(class='d-flex gap-2 flex-wrap', [
+                                    a([class='btn btn-primary', href='/store'], 'Kembali')
+                                ])
+                            ])
+                        ])
+                    ])
+                )
+            )
+        ;   % If there was an error during the request, display the login failed page with a generic message
+            format('Error: ~w~n', [Error]),
+            reply_html_page(
+                title('Gagal'),
+                \html_bootstrap_head, % add bootstrap link
+                div([
+                    div(class='p-4 bg-primary text-white', [
+                        div([
+                            h5('Website UMKM')
+                        ])
+                    ]),
+                    div(class='card mx-5 mt-4', [
+                        div(class='card-body', [
+                            h5(class='card-title mt-2', 'Toko UMKM'),
+                            p('Terjadi kesalahan saat menghubungi server. Silakan coba lagi.'),
+                            div(class='d-flex gap-2 flex-wrap', [
+                                a([class='btn btn-primary', href='/store'], 'Kembali')
+                            ])
+                        ])
+                    ])
+                ])
+            )
         )
-    ),
-    
-    % If there was no error, print success message
-    (   var(Error) % Check if there was no error
-    ->  reply_html_page(
-            title('UMKM | Tambah Toko'),
+    ;   % Catch block failed
+        reply_html_page(
+            title('Gagal'),
             \html_bootstrap_head, % add bootstrap link
-            div([  
+            div([
                 div(class='p-4 bg-primary text-white', [
                     div([
                         h5('Website UMKM')
@@ -747,17 +809,16 @@ submit_store_handler(Request) :-
                 ]),
                 div(class='card mx-5 mt-4', [
                     div(class='card-body', [
-                        h5(class='card-title mt-2', ['Store dengan nama ', Name, ' berhasil ditambahkan.']),
-                        div(class='d-flex gap-2 flex-wrap',[
+                        h5(class='card-title mt-2', 'Toko UMKM'),
+                        p('Terjadi kesalahan saat menghubungi server. Silakan coba lagi.'),
+                        div(class='d-flex gap-2 flex-wrap', [
                             a([class='btn btn-primary', href='/store'], 'Kembali')
                         ])
                     ])
                 ])
             ])
         )
-    ;   true % Do nothing if there was an error, as its already handled
     ).
-
 
 json_edit_data(json(Data), json(Data)).
 
@@ -768,55 +829,85 @@ submit_edit_store_handler(Request) :-
     ->  TokenPresent = true
     ;   TokenPresent = false
     ),
+    
+    % Extract form parameters
+    http_parameters(Request, [
+        code(Code, []),
+        name(Name, []),
+        owner_name(OwnerName, []),
+        description(Description, []),
+        address(Address, []),
+        lattidue(Lattidue, []),
+        longitude(Longitude, []),
+        category(Category, [])
+    ]),
+
+    % Create JSON data
+    json_data(JSON, [code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category, lattidue=Lattidue, longitude=Longitude]),
+    
     % Define headers with the Authorization Bearer token
     (   TokenPresent
     ->  format(atom(AuthHeader), 'Bearer ~w', [Token]),
         Headers = [request_header('Authorization'=AuthHeader), request_header('Content-Type'='application/json')]
     ;   Headers = [request_header('Content-Type'='application/json')]
     ),
-    % Extract form parameters
-    (   http_parameters(Request, [
-            code(Code, []),
-            name(Name, []),
-            owner_name(OwnerName, []),
-            description(Description, []),
-            address(Address, []),
-            lattidue(Lattidue, []),
-            longitude(Longitude, []),
-            category(Category, [])
-        ])
-    ->  % Ensure all parameters are properly instantiated
-        json_edit_data(json([code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category, lattidue=Lattidue, longitude=Longitude]), JSON),
-        format(atom(Url), 'http://localhost:3000/stores/~w', [Code]),
-        % Attempt to send the PUT request to the API endpoint
-        (   catch(
-                http_put(Url, json(JSON), Response, Headers),
-                Error,
-                (handle_error(Error), fail)
-            )
-        ->  reply_html_page(
-                title('UMKM | Edit Toko'),
-                \html_bootstrap_head, % add bootstrap link
-                div([  
-                    div(class='p-4 bg-primary text-white', [
-                        div([
-                            h5('Website UMKM')
-                        ])
-                    ]),
-                    div(class='card mx-5 mt-4', [
-                        div(class='card-body', [
-                            h5(class='card-title mt-2', ['Store dengan nama ', Name, ' berhasil diupdate.']),
-                            div(class='d-flex gap-2 flex-wrap',[
-                                a([class='btn btn-primary', href='/store'], 'Kembali')
+    format(atom(Url), 'http://localhost:3000/stores/~w', [Code]),
+
+    % Initialize variables
+    (   catch(
+            http_put(Url, json(JSON), Reply, Headers),
+            Error,
+            true)
+    ->  (   var(Error)
+        ->  (   length(Reply, Length), Length > 0
+            ->  % successful
+                reply_html_page(
+                    title('UMKM | Edit Toko'),
+                    \html_bootstrap_head, % add bootstrap link
+                    div([  
+                        div(class='p-4 bg-primary text-white', [
+                            div([
+                                h5('Website UMKM')
+                            ])
+                        ]),
+                        div(class='card mx-5 mt-4', [
+                            div(class='card-body', [
+                                h5(class='card-title mt-2', ['Store dengan nama ', Name, ' berhasil diupdate.']),
+                                div(class='d-flex gap-2 flex-wrap',[
+                                    a([class='btn btn-primary', href='/store'], 'Kembali')
+                                ])
                             ])
                         ])
                     ])
-                ])
+                )
+            ;   % failed
+                reply_html_page(
+                    title('Gagal'),
+                    \html_bootstrap_head, % add bootstrap link
+                    div([
+                        div(class='p-4 bg-primary text-white', [
+                            div([
+                                h5('Website UMKM')
+                            ])
+                        ]),
+                        div(class='card mx-5 mt-4', [
+                            div(class='card-body', [
+                                h5(class='card-title mt-2', 'Toko UMKM'),
+                                p(Reply.get(message, 'Gagal mengubah toko.')),
+                                div(class='d-flex gap-2 flex-wrap', [
+                                    a([class='btn btn-primary', href='/store'], 'Kembali')
+                                ])
+                            ])
+                        ])
+                    ])
+                )
             )
-        ;   reply_html_page(
-                title('UMKM | Edit Toko'),
+        ;   % If there was an error during the request, display the login failed page with a generic message
+            format('Error: ~w~n', [Error]),
+            reply_html_page(
+                title('Gagal'),
                 \html_bootstrap_head, % add bootstrap link
-                div([  
+                div([
                     div(class='p-4 bg-primary text-white', [
                         div([
                             h5('Website UMKM')
@@ -824,8 +915,9 @@ submit_edit_store_handler(Request) :-
                     ]),
                     div(class='card mx-5 mt-4', [
                         div(class='card-body', [
-                            h5(class='card-title mt-2', 'Terjadi kesalahan saat mengupdate store.'),
-                            div(class='d-flex gap-2 flex-wrap',[
+                            h5(class='card-title mt-2', 'Toko UMKM'),
+                            p('Terjadi kesalahan saat menghubungi server. Silakan coba lagi.'),
+                            div(class='d-flex gap-2 flex-wrap', [
                                 a([class='btn btn-primary', href='/store'], 'Kembali')
                             ])
                         ])
@@ -833,11 +925,11 @@ submit_edit_store_handler(Request) :-
                 ])
             )
         )
-    ;   % If parameter extraction fails, show an error message
+    ;   % Catch block failed
         reply_html_page(
-            title('UMKM | Edit Toko'),
+            title('Gagal'),
             \html_bootstrap_head, % add bootstrap link
-            div([  
+            div([
                 div(class='p-4 bg-primary text-white', [
                     div([
                         h5('Website UMKM')
@@ -845,8 +937,9 @@ submit_edit_store_handler(Request) :-
                 ]),
                 div(class='card mx-5 mt-4', [
                     div(class='card-body', [
-                        h5(class='card-title mt-2', 'Terjadi kesalahan saat mengupdate store. Parameter tidak lengkap.'),
-                        div(class='d-flex gap-2 flex-wrap',[
+                        h5(class='card-title mt-2', 'Toko UMKM'),
+                        p('Terjadi kesalahan saat menghubungi server. Silakan coba lagi.'),
+                        div(class='d-flex gap-2 flex-wrap', [
                             a([class='btn btn-primary', href='/store'], 'Kembali')
                         ])
                     ])
