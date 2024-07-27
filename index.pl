@@ -549,11 +549,7 @@ add_store_handler(_Request) :-
             ]),
             div(class='card mx-5 mt-4', [
                 div(class='card-body', [
-                    form([action='/submit_store', method='POST', autocomplete='off'], [                        
-                        div(class='mb-3', [
-                            label([class='form-label', for='inputCode'], 'Code'),
-                            input([class='form-control', id='inputCode', type='text', name='code', required='required'])
-                        ]),
+                    form([action='/submit_store', method='POST', autocomplete='off'], [
                         div(class='mb-3', [
                             label([class='form-label', for='inputName'], 'Nama'),
                             input([class='form-control', id='inputName', type='text', name='name', required='required'])
@@ -705,7 +701,6 @@ submit_store_handler(Request) :-
     
     % Extract form parameters
     http_parameters(Request, [
-        code(Code, []),
         name(Name, []),
         owner_name(OwnerName, []),
         description(Description, []),
@@ -716,7 +711,7 @@ submit_store_handler(Request) :-
     ]),
 
     % Create JSON data
-    json_data(JSON, [code=Code, name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category, lattidue=Lattidue, longitude=Longitude]),
+    json_data(JSON, [name=Name, owner_name=OwnerName, description=Description, address=Address, category=Category, lattidue=Lattidue, longitude=Longitude]),
     
     % Define headers with the Authorization Bearer token
     (   TokenPresent
