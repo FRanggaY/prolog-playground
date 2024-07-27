@@ -3,39 +3,6 @@
 Install SWI Prolog
 https://www.swi-prolog.org/download/stable
 
-## Static API
-
-This for static data so when restart server, data will be reset
-
-change directory to api-static
-
-```sh
-cd api-static
-```
-
-Install package
-
-```sh
-npm install
-```
-
-Serve with hard reload
-
-```sh
-npm run start
-```
-
-Opsionally, you can use nodemon by 
-
-```sh
-npm run start:nodemon
-```
-
-This api is include:
-- Store
-- Store Review
-- Store Recommendations (TBC)
-
 ## Dynamic API
 
 This live is connected to MYSQL Database so be sure to prepare that mysql connection already exists
