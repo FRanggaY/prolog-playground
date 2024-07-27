@@ -2,6 +2,7 @@
 const pool = require("./database");
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const uuid = require('uuid').v4;
 
 function queryDatabase(sql, params) {
 	return new Promise((resolve, reject) => {
@@ -13,7 +14,8 @@ function queryDatabase(sql, params) {
 }
 // CRUD STORE BEGIN
 exports.createStore = async (req, res) => {
-	const { code, name, owner_name, description, address, category, lattidue, longitude } = req.body;
+	const {name, owner_name, description, address, category, lattidue, longitude } = req.body;
+	const code = uuid();
 	const sql = `INSERT INTO store (code, name, owner_name, description, address, category, lattidue, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
 	try {
 		const checkStoreCode = await queryDatabase("SELECT * FROM store WHERE code = ?", [code]);
